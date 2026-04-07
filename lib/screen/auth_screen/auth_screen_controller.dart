@@ -22,7 +22,7 @@ import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 // Web Client ID (type 3) from google-services.json
 const String _googleWebClientId =
-    '287224857835-0tat8op13jne7q8f7ng1rv0ricpbefep.apps.googleusercontent.com';
+    '28441059803-78ro06cusr82bc0d9ksf3eoo12rvhat1.apps.googleusercontent.com';
 
 class AuthScreenController extends BaseController {
   TextEditingController fullNameController = TextEditingController();

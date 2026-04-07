@@ -54,7 +54,7 @@ Future<void> main() async {
     // Initialize Google Sign-In (required once at app startup for v7+)
     try {
       await GoogleSignIn.instance.initialize(
-        serverClientId: '287224857835-0tat8op13jne7q8f7ng1rv0ricpbefep.apps.googleusercontent.com',
+        serverClientId: '28441059803-78ro06cusr82bc0d9ksf3eoo12rvhat1.apps.googleusercontent.com',
       );
       Loggers.info('GoogleSignIn initialized at startup');
     } catch (e) {
