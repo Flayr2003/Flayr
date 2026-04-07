@@ -349,17 +349,20 @@ class AuthScreenController extends BaseController {
     // Step 1: Authenticate (triggers account picker / Credential Manager)
     final GoogleSignInAccount googleUser = await GoogleSignIn.instance.authenticate();
 
-    // Step 2: Get idToken from authentication
-    final String? idToken = googleUser.authentication.idToken;
+    // Step 2: Get authentication details (MUST use await)
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    
+    // Step 3: Get idToken from authentication
+    final String? idToken = googleAuth.idToken;
 
     if (idToken == null) {
       throw Exception('Google Sign-In failed: idToken is null');
     }
 
-    // Step 3: Create Firebase credential with idToken only
+    // Step 4: Create Firebase credential with idToken only
     final credential = GoogleAuthProvider.credential(idToken: idToken);
 
-    // Step 4: Sign in to Firebase
+    // Step 5: Sign in to Firebase
     return await FirebaseAuth.instance.signInWithCredential(credential);
   }
 
