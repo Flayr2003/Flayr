@@ -23,7 +23,9 @@ jobs:
         uses: android-actions/setup-android@v3
 
       - name: Accept Android Licenses
-        run: yes | sdkmanager --licenses
+        run: |
+          yes | sdkmanager --licenses || true
+          yes | sdkmanager "ndk;29.0.14033849" || true
 
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
