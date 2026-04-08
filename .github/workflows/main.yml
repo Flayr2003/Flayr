@@ -40,7 +40,7 @@ jobs:
 
       - name: Decode Keystore
         run: |
-          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/flayr_release.jks
+          echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > android/app/flayr_release.jks
 
       - name: Create key.properties
         run: |
