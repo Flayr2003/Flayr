@@ -26,7 +26,7 @@ jobs:
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
       with:
-        flutter-version: '3.24.5'
+        flutter-version: '3.29.0'
         channel: 'stable'
         cache: true
         
@@ -79,13 +79,13 @@ jobs:
     - name: Build Summary
       if: always()
       run: |
-        echo "### 📱 Build Summary" >> $GITHUB_STEP_SUMMARY
+        echo "### Build Summary" >> $GITHUB_STEP_SUMMARY
         echo "" >> $GITHUB_STEP_SUMMARY
         echo "**Date:** $(date)" >> $GITHUB_STEP_SUMMARY
         if [ -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
-          echo "**✅ Release APK:** $(du -h build/app/outputs/flutter-apk/app-release.apk | cut -f1)" >> $GITHUB_STEP_SUMMARY
+          echo "**Release APK:** $(du -h build/app/outputs/flutter-apk/app-release.apk | cut -f1)" >> $GITHUB_STEP_SUMMARY
         elif [ -f "build/app/outputs/flutter-apk/app-debug.apk" ]; then
-          echo "**⚠️ Debug APK:** $(du -h build/app/outputs/flutter-apk/app-debug.apk | cut -f1)" >> $GITHUB_STEP_SUMMARY
+          echo "**Debug APK:** $(du -h build/app/outputs/flutter-apk/app-debug.apk | cut -f1)" >> $GITHUB_STEP_SUMMARY
         else
-          echo "**❌ No APK generated**" >> $GITHUB_STEP_SUMMARY
+          echo "**No APK generated**" >> $GITHUB_STEP_SUMMARY
         fi
