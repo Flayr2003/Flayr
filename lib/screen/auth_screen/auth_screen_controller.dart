@@ -297,7 +297,7 @@ class AuthScreenController extends BaseController {
   /// Google Sign-In using google_sign_in v7+ API
   Future<UserCredential> signInWithGoogle() async {
     // Step 1: Authenticate (triggers account picker / Credential Manager)
-    final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.signIn();
+    final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.authenticate();
     if (googleUser == null) {
       throw Exception('Google Sign-In cancelled by user');
     }
