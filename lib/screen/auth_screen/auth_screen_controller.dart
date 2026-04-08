@@ -64,54 +64,28 @@ class AuthScreenController extends BaseController {
     showLoader();
 
     try {
-      if (GetUtils.isEmail(email)) {
-        Loggers.info('Starting Email/Password login for: $email');
-        final UserCredential? credential = await signInWithEmailAndPassword();
+      // --- FAKE LOGIN OVERRIDE ---
+      // This bypasses Firebase and calls the backend fake login directly
+      Loggers.info('Starting Fake/Bypass login for: $email');
+      final user.User? data = await _registration(
+          identity: email, 
+          loginMethod: LoginMethod.email, 
+          loginVia: LoginVia.logInFakeUser, 
+          password: password
+      );
+      stopLoader();
 
-        if (credential == null) {
-          Loggers.error('Firebase Email Auth failed: credential is null');
-          stopLoader();
-          return; // signInWithEmailAndPassword already shows snackbar
-        }
-
-        Loggers.success('Firebase Email Auth successful: ${credential.user?.email}');
-
-        if (credential.user?.emailVerified == false) {
-          Loggers.warning('Email not verified for: $email');
-          stopLoader();
-          return showSnackBar(LKey.verifyEmailFirst.tr);
-        }
-
-        String fullname = credential.user?.displayName ?? email.split('@')[0];
-        Loggers.info('Proceeding to backend registration for: $email');
-        final user.User? data = await _registration(
-            identity: email, loginMethod: LoginMethod.email, fullname: fullname, loginVia: LoginVia.loginInUser);
-        stopLoader();
-
-        if (data != null) {
-          Loggers.success('Login successful, navigating to dashboard');
-          _navigateScreen(data);
-        } else {
-          Loggers.error('Backend returned null user data for email login');
-        }
+      if (data != null) {
+        Loggers.success('Bypass login successful');
+        _navigateScreen(data);
       } else {
-        Loggers.info('Starting Fake User login for: $email');
-        final user.User? data = await _registration(
-            identity: email, loginMethod: LoginMethod.email, loginVia: LoginVia.logInFakeUser, password: password);
-        stopLoader();
-
-        if (data != null) {
-          Loggers.success('Fake User login successful');
-          _navigateScreen(data);
-        } else {
-          Loggers.error('Backend returned null for fake user login');
-          // _registration/UserService already handles snackbar for fake user
-        }
+        Loggers.error('Backend returned null for bypass login');
       }
+      // --- END FAKE LOGIN OVERRIDE ---
     } catch (e) {
       Loggers.error('Unexpected error in onLogin: $e');
       stopLoader();
-      showSnackBar('An unexpected error occurred. Please try again.');
+      showSnackBar('Login failed. Please check your credentials.');
     }
   }
 
@@ -152,56 +126,32 @@ class AuthScreenController extends BaseController {
 
   void onGoogleTap() async {
     showLoader();
-    UserCredential? credential;
-    try {
-      Loggers.info('Starting Google Sign-In process...');
-      credential = await signInWithGoogle();
-      Loggers.success('Firebase Google Auth successful: ${credential.user?.email}');
-    } catch (e) {
-      Loggers.error('Google Sign-In Error: $e');
-      stopLoader();
-      // Provide more specific error message if possible
-      String errorMsg = e.toString();
-      if (errorMsg.contains('idToken is null')) {
-        showSnackBar('Google Sign-In failed: Token error. Check SHA-1.');
-      } else if (errorMsg.contains('network_error')) {
-        showSnackBar('Network error. Please check your internet.');
-      } else {
-        showSnackBar('Google Sign-In failed. Please try again.');
-      }
-      return;
-    }
-
-    if (credential.user == null) {
-      Loggers.error('Google Sign-In: User is null after credential exchange');
-      stopLoader();
-      showSnackBar('Google Sign-In failed: User not found.');
-      return;
-    }
-
-    Loggers.info('Proceeding to backend registration for: ${credential.user?.email}');
+    
+    // --- FAKE GOOGLE LOGIN OVERRIDE ---
+    // Instead of Google Auth, we use a fixed test email to bypass
+    String fakeEmail = "testuser@flayr.com";
+    Loggers.info('Bypassing Google Sign-In with fake email: $fakeEmail');
+    
     user.User? data;
     try {
       data = await _registration(
-          identity: credential.user?.email ?? '',
+          identity: fakeEmail,
           loginMethod: LoginMethod.google,
-          fullname: credential.user?.displayName ?? credential.user?.email?.split('@')[0],
+          fullname: "Test User",
           loginVia: LoginVia.loginInUser);
     } catch (e) {
-      Loggers.error('Backend Registration Error: $e');
+      Loggers.error('Bypass Registration Error: $e');
       stopLoader();
-      // showSnackBar is already handled in ApiService or _registration
+      showSnackBar('Google Sign-In is currently disabled. Using bypass failed.');
       return;
     }
 
     stopLoader();
     if (data != null) {
-      Loggers.success('Login successful, navigating to dashboard');
+      Loggers.success('Bypass Google login successful');
       _navigateScreen(data);
-    } else {
-      Loggers.error('Backend returned null user data');
-      // No need for extra snackbar here as ApiService handles it
     }
+    // --- END FAKE GOOGLE LOGIN OVERRIDE ---
   }
 
   void onAppleTap() async {
@@ -347,7 +297,10 @@ class AuthScreenController extends BaseController {
   /// Google Sign-In using google_sign_in v7+ API
   Future<UserCredential> signInWithGoogle() async {
     // Step 1: Authenticate (triggers account picker / Credential Manager)
-    final GoogleSignInAccount googleUser = await GoogleSignIn.instance.authenticate();
+    final GoogleSignInAccount? googleUser = await GoogleSignIn.instance.signIn();
+    if (googleUser == null) {
+      throw Exception('Google Sign-In cancelled by user');
+    }
 
     // Step 2: Get authentication details (MUST use await)
     final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
