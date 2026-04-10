@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -29,245 +28,137 @@ class AuthScreenController extends BaseController {
   TextEditingController emailController = TextEditingController();
   TextEditingController forgetEmailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
-  TextEditingController confirmPassController = TextEditingController();
+  TextEditingController confirmPasswordController = TextEditingController();
+
+  RxBool isPasswordVisible = false.obs;
+  RxBool isConfirmPasswordVisible = false.obs;
+  RxBool isTermsChecked = false.obs;
 
   @override
   void onInit() {
-    CommonService.instance.fetchGlobalSettings();
-    FirebaseNotificationManager.instance;
     super.onInit();
   }
 
-  Future<void> onLogin() async {
-    final email = emailController.text.trim();
-    final password = passwordController.text.trim();
-
-    if (email.isEmpty) {
-      return showSnackBar(LKey.enterEmail.tr);
-    }
-    if (password.isEmpty) {
-      return showSnackBar(LKey.enterAPassword.tr);
-    }
-
-    showLoader();
-
-    try {
-      // Real Login using Firebase
-      UserCredential? credential = await signInWithEmailAndPassword();
-      if (credential != null) {
-        final user.User? data = await _registration(
-            identity: email, 
-            loginMethod: LoginMethod.email, 
-            loginVia: LoginVia.loginInUser, 
-            password: password
-        );
-        stopLoader();
-
-        if (data != null) {
-          _navigateScreen(data);
-        }
-      } else {
-        stopLoader();
-      }
-    } catch (e) {
-      Loggers.error('Unexpected error in onLogin: $e');
-      stopLoader();
-      showSnackBar('Login failed. Please check your credentials.');
-    }
+  void togglePasswordVisibility() {
+    isPasswordVisible.value = !isPasswordVisible.value;
   }
 
-  Future<void> onCreateAccount() async {
-    if (fullNameController.text.trim().isEmpty) {
-      return showSnackBar(LKey.fullNameEmpty.tr);
-    }
+  void toggleConfirmPasswordVisibility() {
+    isConfirmPasswordVisible.value = !isConfirmPasswordVisible.value;
+  }
+
+  void toggleTermsCheck() {
+    isTermsChecked.value = !isTermsChecked.value;
+  }
+
+  Future<void> login() async {
     if (emailController.text.trim().isEmpty) {
-      return showSnackBar(LKey.enterEmail.tr);
+      Get.snackbar(LanguagesKeys.error.tr, LanguagesKeys.enterEmail.tr);
+      return;
     }
     if (passwordController.text.trim().isEmpty) {
-      return showSnackBar(LKey.enterAPassword.tr);
+      Get.snackbar(LanguagesKeys.error.tr, LanguagesKeys.enterPassword.tr);
+      return;
     }
-    if (confirmPassController.text.trim().isEmpty) {
-      return showSnackBar(LKey.confirmPasswordEmpty.tr);
-    }
-    if (!GetUtils.isEmail(emailController.text.trim())) {
-      return showSnackBar(LKey.invalidEmail.tr);
-    }
-    if (passwordController.text.trim() != confirmPassController.text.trim()) {
-      return showSnackBar(LKey.passwordMismatch.tr);
-    }
-    showLoader();
-    UserCredential? credential = await createUserWithEmailAndPassword();
-    if (credential != null) {
-      await _registration(
-          identity: emailController.text.trim(),
-          loginMethod: LoginMethod.email,
-          fullname: fullNameController.text.trim(),
-          loginVia: LoginVia.loginInUser);
-      if (credential.user != null) {
-        credential.user!.updateDisplayName(fullNameController.text.trim());
-        credential.user!.sendEmailVerification();
+
+    showLoading();
+    try {
+      final response = await UserService.instance.login(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+        deviceToken: await FirebaseNotificationManager.instance.getDeviceToken() ?? '',
+        deviceType: GetPlatform.isAndroid ? 'android' : 'ios',
+      );
+
+      hideLoading();
+      if (response.status == 200 && response.data != null) {
+        _navigateScreen(response.data!);
+      } else {
+        Get.snackbar(LanguagesKeys.error.tr, response.message ?? '');
       }
-      Get.back();
-      Get.back();
-      showSnackBar(LKey.verificationLinkSent.tr);
-    }
-  }
-
-  void onGoogleTap() async {
-    showLoader();
-    UserCredential? credential;
-    try {
-      credential = await signInWithGoogle();
     } catch (e) {
-      Loggers.error(e);
-      stopLoader();
-      return;
-    }
-    if (credential == null || credential.user == null) {
-      stopLoader();
-      return;
-    }
-    user.User? data = await _registration(
-        identity: credential.user?.email ?? '',
-        loginMethod: LoginMethod.google,
-        fullname: credential.user?.displayName ?? credential.user?.email?.split('@')[0],
-        loginVia: LoginVia.loginInUser);
-    stopLoader();
-    if (data != null) {
-      _navigateScreen(data);
+      hideLoading();
+      Logger.instance.e('Login Error: $e');
+      Get.snackbar(LanguagesKeys.error.tr, e.toString());
     }
   }
 
-  void onAppleTap() async {
-    showLoader();
-    UserCredential? credential;
+  Future<void> register() async {
+    if (fullNameController.text.trim().isEmpty) {
+      Get.snackbar(LanguagesKeys.error.tr, LanguagesKeys.enterFullName.tr);
+      return;
+    }
+    if (emailController.text.trim().isEmpty) {
+      Get.snackbar(LanguagesKeys.error.tr, LanguagesKeys.enterEmail.tr);
+      return;
+    }
+    if (passwordController.text.trim().isEmpty) {
+      Get.snackbar(LanguagesKeys.error.tr, LanguagesKeys.enterPassword.tr);
+      return;
+    }
+    if (passwordController.text.trim() != confirmPasswordController.text.trim()) {
+      Get.snackbar(LanguagesKeys.error.tr, LanguagesKeys.passwordNotMatch.tr);
+      return;
+    }
+    if (!isTermsChecked.value) {
+      Get.snackbar(LanguagesKeys.error.tr, LanguagesKeys.acceptTerms.tr);
+      return;
+    }
+
+    showLoading();
     try {
-      credential = await signInWithApple();
+      final response = await UserService.instance.register(
+        fullName: fullNameController.text.trim(),
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+        deviceToken: await FirebaseNotificationManager.instance.getDeviceToken() ?? '',
+        deviceType: GetPlatform.isAndroid ? 'android' : 'ios',
+      );
+
+      hideLoading();
+      if (response.status == 200 && response.data != null) {
+        _navigateScreen(response.data!);
+      } else {
+        Get.snackbar(LanguagesKeys.error.tr, response.message ?? '');
+      }
     } catch (e) {
-      Loggers.error(e);
-      stopLoader();
-      return;
-    }
-    if (credential == null || credential.user == null) {
-      stopLoader();
-      return;
-    }
-    user.User? data = await _registration(
-        identity: credential.user?.email ?? '',
-        loginMethod: LoginMethod.apple,
-        fullname: credential.user?.displayName ?? credential.user?.email?.split('@')[0],
-        loginVia: LoginVia.loginInUser);
-    stopLoader();
-    if (data != null) {
-      _navigateScreen(data);
+      hideLoading();
+      Logger.instance.e('Register Error: $e');
+      Get.snackbar(LanguagesKeys.error.tr, e.toString());
     }
   }
 
-  Future<user.User?> _registration(
-      {required String identity,
-      required LoginMethod loginMethod,
-      String? fullname,
-      required LoginVia loginVia,
-      String? password}) async {
-    Loggers.info('Fetching device token for registration...');
-    String? deviceToken = '';
+  Future<void> signInWithGoogle() async {
+    showLoading();
     try {
-      if (!kIsWeb && (Platform.isAndroid || Platform.isIOS)) {
-        deviceToken = await FirebaseNotificationManager.instance.getNotificationToken().timeout(
-          const Duration(seconds: 3),
-          onTimeout: () {
-            Loggers.warning('FCM Token fetch timed out, using empty token');
-            return '';
-          },
+      final userCredential = await _googleSignInProcess();
+      if (userCredential != null && userCredential.user != null) {
+        final response = await UserService.instance.socialLogin(
+          email: userCredential.user!.email ?? '',
+          fullName: userCredential.user!.displayName ?? '',
+          identity: userCredential.user!.uid,
+          type: 'google',
+          deviceToken: await FirebaseNotificationManager.instance.getDeviceToken() ?? '',
+          deviceType: GetPlatform.isAndroid ? 'android' : 'ios',
         );
-      }
-    } catch (e) {
-      Loggers.error('Error fetching device token: $e');
-    }
-    deviceToken ??= '';
 
-    user.User? userData;
-    try {
-      switch (loginVia) {
-        case LoginVia.loginInUser:
-          userData = await UserService.instance
-              .logInUser(identity: identity, loginMethod: loginMethod, deviceToken: deviceToken, fullName: fullname);
-          break;
-        case LoginVia.logInFakeUser:
-          userData = await UserService.instance
-              .logInFakeUser(identity: identity, loginMethod: loginMethod, deviceToken: deviceToken, password: password);
-          break;
-      }
-    } catch (e) {
-      Loggers.error('API Call Exception in _registration: $e');
-      rethrow;
-    }
-
-    Setting? setting = SessionManager.instance.getSettings();
-    if (userData?.isDummy == 0 && userData?.newRegister == true && setting?.registrationBonusStatus == 1) {
-      final translations = Get.find<DynamicTranslations>();
-      final languageData = translations.keys[userData?.appLanguage] ?? {};
-
-      NotificationService.instance.pushNotification(
-          title: languageData[LKey.registrationBonusTitle] ?? LKey.registrationBonusTitle.tr,
-          body: languageData[LKey.registrationBonusDescription] ?? LKey.registrationBonusDescription.tr,
-          type: NotificationType.other,
-          deviceType: userData?.device,
-          token: userData?.deviceToken,
-          authorizationToken: userData?.token?.authToken);
-    }
-    SubscriptionManager.shared.login('${userData?.id}');
-    if (userData != null) {
-      return userData;
-    }
-    return null;
-  }
-
-  Future<UserCredential?> createUserWithEmailAndPassword() async {
-    try {
-      final credential = await FirebaseAuth.instance
-          .createUserWithEmailAndPassword(email: emailController.text.trim(), password: passwordController.text.trim());
-      SessionManager.instance.setPassword(passwordController.text.trim());
-      return credential;
-    } on FirebaseAuthException catch (e) {
-      stopLoader();
-      Loggers.error(e.message);
-      if (e.code == 'weak-password') {
-        showSnackBar(LKey.weakPassword.tr);
-      } else if (e.code == 'email-already-in-use') {
-        showSnackBar(LKey.accountExists.tr);
+        hideLoading();
+        if (response.status == 200 && response.data != null) {
+          _navigateScreen(response.data!);
+        } else {
+          Get.snackbar(LanguagesKeys.error.tr, response.message ?? '');
+        }
       } else {
-        showSnackBar(e.message);
+        hideLoading();
       }
-      return null;
-    }
-  }
-
-  Future<UserCredential?> signInWithEmailAndPassword() async {
-    try {
-      final credential = await FirebaseAuth.instance
-          .signInWithEmailAndPassword(email: emailController.text.trim(), password: passwordController.text.trim());
-      return credential;
-    } on FirebaseAuthException catch (e) {
-      stopLoader();
-      if (e.code == 'user-not-found') {
-        showSnackBar(LKey.noUserFound.tr);
-      } else if (e.code == 'wrong-password') {
-        showSnackBar(LKey.incorrectPassword.tr);
-      } else if (e.code == 'invalid-credential') {
-        showSnackBar(LKey.incorrectPassword.tr);
-      } else {
-        showSnackBar(e.message ?? 'Login failed. Please try again.');
-      }
-      return null;
     } catch (e) {
-      stopLoader();
-      Loggers.error('Unexpected login error: $e');
-      return null;
+      hideLoading();
+      Logger.instance.e('Google Sign-In Error: $e');
+      Get.snackbar(LanguagesKeys.error.tr, e.toString());
     }
   }
 
-  Future<UserCredential> signInWithGoogle() async {
+  Future<UserCredential?> _googleSignInProcess() async {
     final GoogleSignIn googleSignIn = GoogleSignIn(
       serverClientId: _googleWebClientId,
     );
@@ -281,6 +172,36 @@ class AuthScreenController extends BaseController {
     );
 
     return await FirebaseAuth.instance.signInWithCredential(credential);
+  }
+
+  Future<void> appleSignIn() async {
+    showLoading();
+    try {
+      final userCredential = await signInWithApple();
+      if (userCredential != null && userCredential.user != null) {
+        final response = await UserService.instance.socialLogin(
+          email: userCredential.user!.email ?? '',
+          fullName: userCredential.user!.displayName ?? '',
+          identity: userCredential.user!.uid,
+          type: 'apple',
+          deviceToken: await FirebaseNotificationManager.instance.getDeviceToken() ?? '',
+          deviceType: GetPlatform.isAndroid ? 'android' : 'ios',
+        );
+
+        hideLoading();
+        if (response.status == 200 && response.data != null) {
+          _navigateScreen(response.data!);
+        } else {
+          Get.snackbar(LanguagesKeys.error.tr, response.message ?? '');
+        }
+      } else {
+        hideLoading();
+      }
+    } catch (e) {
+      hideLoading();
+      Logger.instance.e('Apple Sign-In Error: $e');
+      Get.snackbar(LanguagesKeys.error.tr, e.toString());
+    }
   }
 
   Future<UserCredential?> signInWithApple() async {
@@ -308,19 +229,27 @@ class AuthScreenController extends BaseController {
 
   void forgetPassword() async {
     if (forgetEmailController.text.trim().isEmpty) {
-      return showSnackBar(LKey.enterEmail.tr);
+      Get.snackbar(LanguagesKeys.error.tr, LanguagesKeys.enterEmail.tr);
+      return;
     }
-    showLoader();
+
+    showLoading();
     try {
-      await FirebaseAuth.instance.sendPasswordResetEmail(email: forgetEmailController.text.trim());
-      stopLoader();
-      Get.back();
-      showSnackBar(LKey.verificationLinkSent.tr);
-    } on FirebaseAuthException catch (e) {
-      stopLoader();
-      showSnackBar(e.message);
+      final response = await UserService.instance.forgetPassword(
+        email: forgetEmailController.text.trim(),
+      );
+
+      hideLoading();
+      if (response.status == 200) {
+        Get.back();
+        Get.snackbar(LanguagesKeys.success.tr, response.message ?? '');
+      } else {
+        Get.snackbar(LanguagesKeys.error.tr, response.message ?? '');
+      }
+    } catch (e) {
+      hideLoading();
+      Logger.instance.e('Forget Password Error: $e');
+      Get.snackbar(LanguagesKeys.error.tr, e.toString());
     }
   }
 }
-
-enum LoginVia { loginInUser, logInFakeUser }
