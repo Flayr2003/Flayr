@@ -126,10 +126,13 @@ class AuthScreenController extends BaseController {
     final GoogleSignIn googleSignIn = GoogleSignIn(
       serverClientId: _googleWebClientId,
     );
+    // Use the explicit type and wait for the result
     final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
     if (googleUser == null) throw 'Google Sign-In cancelled';
 
     final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+    
+    // In some versions, it might be access_token or just idToken is enough for Firebase
     final AuthCredential credential = GoogleAuthProvider.credential(
       accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
