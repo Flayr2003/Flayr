@@ -157,7 +157,7 @@ class AuthScreenController extends BaseController {
     final existing = SessionManager.instance.getUser();
     final existingToken = SessionManager.instance.getToken();
 
-    return user.User(
+    final localUser = user.User(
       id: existing?.id,
       identity: firebaseUser.uid,
       fullname: (firebaseUser.displayName?.trim().isNotEmpty ?? false)
@@ -168,8 +168,10 @@ class AuthScreenController extends BaseController {
       profilePhoto: firebaseUser.photoURL ?? existing?.profilePhoto,
       loginMethod: LoginMethod.google.title(),
       appLanguage: SessionManager.instance.getLang(),
-      token: existingToken,
     );
+
+    localUser.token = existingToken;
+    return localUser;
   }
 
   Future<void> _syncGoogleUserInBackground(User firebaseUser) async {
