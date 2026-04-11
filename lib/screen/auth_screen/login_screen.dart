@@ -21,52 +21,58 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(AuthScreenController());
+
     return Scaffold(
       resizeToAvoidBottomInset: true,
       body: Container(
-        height: Get.height,
         decoration: const ShapeDecoration(
-            shape: SmoothRectangleBorder(
-          borderRadius: SmoothBorderRadius.vertical(
-              top: SmoothRadius(cornerRadius: 0, cornerSmoothing: 1)),
-        )),
+          shape: SmoothRectangleBorder(
+            borderRadius: SmoothBorderRadius.vertical(
+              top: SmoothRadius(cornerRadius: 0, cornerSmoothing: 1),
+            ),
+          ),
+        ),
         child: Stack(
           children: [
             const ThemeBlurBg(),
-            SingleChildScrollView(
-              child: SafeArea(
-                bottom: false,
+            SafeArea(
+              bottom: false,
+              child: SingleChildScrollView(
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                padding: EdgeInsets.only(
+                  bottom: MediaQuery.of(context).viewInsets.bottom + 20,
+                ),
                 child: Column(
                   children: [
                     Padding(
-                      padding:
-                          const EdgeInsets.only(left: 20, right: 20, top: 30),
+                      padding: const EdgeInsetsDirectional.only(start: 20, end: 20, top: 30),
                       child: Column(
                         children: [
                           Padding(
                             padding: const EdgeInsets.only(top: 30.0),
                             child: RichText(
-                                textAlign: TextAlign.center,
-                                text: TextSpan(
-                                  text: LKey.signIn.tr.toUpperCase(),
-                                  style: TextStyleCustom.unboundedBlack900(
-                                    fontSize: 25,
-                                    color: whitePure(context),
-                                  ).copyWith(letterSpacing: -.2),
-                                  children: [
-                                    TextSpan(
-                                        text: '\n${LKey.toContinue.tr}'
-                                            .toUpperCase(),
-                                        style:
-                                            TextStyleCustom.unboundedBlack900(
-                                                fontSize: 25,
-                                                color: whitePure(context)
-                                                    .withValues(alpha: .5),
-                                                opacity: .5))
-                                  ],
-                                )),
+                              textAlign: TextAlign.center,
+                              text: TextSpan(
+                                text: LKey.signIn.tr.toUpperCase(),
+                                style: TextStyleCustom.unboundedBlack900(
+                                  fontSize: 25,
+                                  color: whitePure(context),
+                                ).copyWith(letterSpacing: -.2),
+                                children: [
+                                  TextSpan(
+                                    text: '\n${LKey.toContinue.tr}'.toUpperCase(),
+                                    style: TextStyleCustom.unboundedBlack900(
+                                      fontSize: 25,
+                                      color: whitePure(context).withValues(alpha: .5),
+                                      opacity: .5,
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
                           ),
-                          const SizedBox(height: 50 * 1.5),
+                          const SizedBox(height: 56),
                           LoginSheetTextField(
                             hintText: LKey.enterYourEmail.tr,
                             controller: controller.emailController,
@@ -82,26 +88,31 @@ class LoginScreen extends StatelessWidget {
                             alignment: AlignmentDirectional.centerEnd,
                             child: InkWell(
                               onTap: () {
-                                Get.bottomSheet(const ForgetPasswordSheet(),
-                                        isScrollControlled: true)
-                                    .then((value) => controller
-                                        .forgetEmailController
-                                        .clear());
+                                Get.bottomSheet(
+                                  const ForgetPasswordSheet(),
+                                  isScrollControlled: true,
+                                ).then((_) =>
+                                    controller.forgetEmailController.clear());
                               },
                               child: Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                      vertical: 14.0),
-                                  child: Text(LKey.forgetPassword.tr,
-                                      style: TextStyleCustom.outFitRegular400(
-                                          fontSize: 16,
-                                          color: whitePure(context)))),
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14.0),
+                                child: Text(
+                                  LKey.forgetPassword.tr,
+                                  style: TextStyleCustom.outFitRegular400(
+                                    fontSize: 16,
+                                    color: whitePure(context),
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                           TextButtonCustom(
-                              onTap: controller.onLogin,
-                              title: LKey.logIn.tr,
-                              btnHeight: 50,
-                              horizontalMargin: 0)
+                            onTap: controller.onLogin,
+                            title: LKey.logIn.tr,
+                            btnHeight: 50,
+                            horizontalMargin: 0,
+                          )
                         ],
                       ),
                     ),
@@ -115,41 +126,50 @@ class LoginScreen extends StatelessWidget {
                       },
                       child: Container(
                         height: 48,
-                        margin: const EdgeInsets.symmetric(vertical: 25),
+                        margin: const EdgeInsets.symmetric(vertical: 24),
                         alignment: Alignment.center,
                         color: whitePure(context).withValues(alpha: .2),
                         child: Text(
                           LKey.createAccountHere.tr,
                           style: TextStyleCustom.outFitRegular400(
-                              color: whitePure(context), fontSize: 16),
+                            color: whitePure(context),
+                            fontSize: 16,
+                          ),
                         ),
                       ),
                     ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        CustomDivider(
-                          color: whitePure(context),
-                          height: .5,
-                          width: 100,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 15.0),
-                          child: Text(
-                            LKey.continueWith.tr,
-                            style: TextStyleCustom.outFitRegular400(
-                                fontSize: 16, color: whitePure(context)),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: CustomDivider(
+                              color: whitePure(context),
+                              height: .5,
+                            ),
                           ),
-                        ),
-                        CustomDivider(
-                          color: whitePure(context),
-                          height: .5,
-                          width: 100,
-                        ),
-                      ],
+                          Padding(
+                            padding:
+                                const EdgeInsets.symmetric(horizontal: 12.0),
+                            child: Text(
+                              LKey.continueWith.tr,
+                              style: TextStyleCustom.outFitRegular400(
+                                fontSize: 16,
+                                color: whitePure(context),
+                              ),
+                            ),
+                          ),
+                          Expanded(
+                            child: CustomDivider(
+                              color: whitePure(context),
+                              height: .5,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                     Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 25.0),
+                      padding: const EdgeInsets.symmetric(vertical: 24.0),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
@@ -160,8 +180,9 @@ class LoginScreen extends StatelessWidget {
                             ),
                           if (Platform.isIOS) const SizedBox(width: 10),
                           SocialBtn(
-                              onTap: controller.onGoogleTap,
-                              icon: AssetRes.icGoogle),
+                            onTap: controller.onGoogleTap,
+                            icon: AssetRes.icGoogle,
+                          ),
                         ],
                       ),
                     ),
@@ -224,8 +245,8 @@ class _LoginSheetTextFieldState extends State<LoginSheetTextField> {
           hintText: widget.hintText,
           hintStyle: TextStyleCustom.outFitRegular400(
               color: whitePure(context), fontSize: 16),
-          contentPadding: EdgeInsets.only(
-              left: 10, right: 10, top: widget.isPasswordField ? 2 : 0),
+          contentPadding: EdgeInsetsDirectional.only(
+              start: 10, end: 10, top: widget.isPasswordField ? 2 : 0),
           suffixIconConstraints: const BoxConstraints(),
           suffixIcon: widget.isPasswordField
               ? InkWell(

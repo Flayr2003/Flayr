@@ -62,7 +62,7 @@ class LiveStreamSearchTopView extends StatelessWidget {
             child: FittedBox(
               child: Container(
                 height: 30,
-                margin: const EdgeInsets.only(top: 10),
+                margin: const EdgeInsetsDirectional.only(top: 10),
                 padding: const EdgeInsets.symmetric(horizontal: 15),
                 alignment: Alignment.center,
                 decoration: ShapeDecoration(
@@ -87,7 +87,7 @@ class LiveStreamSearchTopView extends StatelessWidget {
             onTap: controller.onGoLive,
             child: Container(
               height: 30,
-              margin: const EdgeInsets.only(top: 10, right: 10, left: 10),
+              margin: const EdgeInsetsDirectional.only(top: 10, end: 10, start: 10),
               padding: const EdgeInsets.symmetric(horizontal: 8),
               decoration: ShapeDecoration(
                   color: Colors.white,
@@ -399,7 +399,7 @@ class LiveStreamListView extends StatelessWidget {
                   description: LKey.noLivestreamsDescription.tr,
                   child: GridView.builder(
                     itemCount: controller.livestreamFilterList.length,
-                    padding: EdgeInsets.only(bottom: AppBar().preferredSize.height),
+                    padding: EdgeInsetsDirectional.only(bottom: AppBar().preferredSize.height),
                     gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                         crossAxisCount: 2, crossAxisSpacing: 1, mainAxisSpacing: 1, mainAxisExtent: 310),
                     itemBuilder: (context, index) {

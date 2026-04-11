@@ -25,134 +25,111 @@ class SelectLanguageScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller =
         Get.put(SelectLanguageScreenController(languageNavigationType));
+
     return Scaffold(
       body: Stack(
         children: [
           const ThemeBlurBg(),
           SafeArea(
-            top: false,
             child: Column(
               children: [
-                switch (languageNavigationType) {
-                  LanguageNavigationType.fromStart => SafeArea(
-                      child: Container(
-                        padding:
-                            const EdgeInsets.only(left: 20, right: 20, top: 30),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              width: 60,
-                              height: 60,
-                              padding: const EdgeInsets.all(12),
-                              decoration: ShapeDecoration(
-                                  color:
-                                      whitePure(context).withValues(alpha: .1),
-                                  shape: SmoothRectangleBorder(
-                                    borderRadius:
-                                        SmoothBorderRadius(cornerRadius: 15),
-                                  )),
-                              child: Image.asset(AssetRes.icLanguage),
-                            ),
-                            const SizedBox(width: 18),
-                            Expanded(
-                                child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Text(
-                                  LKey.select.tr.toUpperCase(),
-                                  style: TextStyleCustom.unboundedBlack900(
-                                      fontSize: 22, color: whitePure(context)),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                                Text(
-                                  LKey.language.tr.toUpperCase(),
-                                  style: TextStyleCustom.unboundedBlack900(
-                                      fontSize: 22,
-                                      color: whitePure(context),
-                                      opacity: .5),
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                ),
-                              ],
-                            )),
-                          ],
-                        ),
+                _buildHeader(context),
+                Expanded(
+                  child: Container(
+                    margin: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 12),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    decoration: ShapeDecoration(
+                      color: whitePure(context),
+                      shape: SmoothRectangleBorder(
+                        borderRadius:
+                            SmoothBorderRadius(cornerRadius: 20, cornerSmoothing: 1),
                       ),
                     ),
-                  LanguageNavigationType.fromSetting => CustomAppBar(
-                      title: LKey.languages.tr,
-                      titleStyle: TextStyleCustom.unboundedSemiBold600(
-                          fontSize: 15, color: whitePure(context)),
-                      bgColor: Colors.transparent,
-                      iconColor: whitePure(context)),
-                },
-                Expanded(
-                  child: ListView.builder(
-                      itemCount: controller.languages.length,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 15, vertical: 15),
-                      itemBuilder: (context, index) {
-                        Language language = controller.languages[index];
-                        return Obx(
-                          () {
-                            bool isSelected =
-                                language == controller.selectedLanguage.value;
-                            return GestureDetector(
+                    child: Obx(
+                      () => ListView.separated(
+                        itemCount: controller.languages.length,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 8),
+                        separatorBuilder: (_, __) => const SizedBox(height: 10),
+                        itemBuilder: (context, index) {
+                          final language = controller.languages[index];
+                          final isSelected =
+                              language == controller.selectedLanguage.value;
+
+                          return Material(
+                            color: isSelected
+                                ? themeAccentSolid(context).withValues(alpha: .12)
+                                : scaffoldBackgroundColor(context),
+                            borderRadius: BorderRadius.circular(14),
+                            child: InkWell(
+                              borderRadius: BorderRadius.circular(14),
                               onTap: () => controller.onLanguageChange(language),
-                              child: Container(
-                                margin: const EdgeInsets.symmetric(vertical: 4),
-                                decoration: ShapeDecoration(
-                                  shape: SmoothRectangleBorder(
-                                    borderRadius: SmoothBorderRadius(cornerRadius: 10, cornerSmoothing: 1),
-                                    side: isSelected
-                                        ? BorderSide(color: whitePure(context))
-                                        : const BorderSide(color: Colors.transparent),
-                                  ),
-                                  color: whitePure(context).withValues(alpha: isSelected ? .3 : .1),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 14, vertical: 12),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            language.localizedTitle ?? '',
+                                            style:
+                                                TextStyleCustom.outFitMedium500(
+                                              fontSize: 15,
+                                              color: textDarkGrey(context),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            language.title ?? '',
+                                            style:
+                                                TextStyleCustom.outFitRegular400(
+                                              fontSize: 13,
+                                              color: textLightGrey(context),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Icon(
+                                      isSelected
+                                          ? Icons.check_circle
+                                          : Icons.radio_button_unchecked,
+                                      color: isSelected
+                                          ? themeAccentSolid(context)
+                                          : textLightGrey(context),
+                                      size: 22,
+                                    )
+                                  ],
                                 ),
-                                child: RadioListTile<Language?>(
-                                    value: language,
-                                    groupValue: controller.selectedLanguage.value,
-                                    onChanged: controller.onLanguageChange,
-                                    activeColor: whitePure(context),
-                                    fillColor: WidgetStatePropertyAll(whitePure(context)),
-                                    splashRadius: 0,
-                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                                    dense: true,
-                                    visualDensity: const VisualDensity(
-                                      horizontal: VisualDensity.minimumDensity,
-                                      vertical: VisualDensity.minimumDensity,
-                                    ),
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                    title: Text(
-                                      language.localizedTitle ?? '',
-                                      style: TextStyleCustom.outFitLight300(fontSize: 14, color: whitePure(context)),
-                                    ),
-                                    subtitle: Text(
-                                      language.title ?? '',
-                                      style: TextStyleCustom.outFitMedium500(fontSize: 16, color: whitePure(context)),
-                                    )),
                               ),
-                            );
-                          },
-                        );
-                      }),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
                 ),
                 if (languageNavigationType == LanguageNavigationType.fromStart)
-                  TextButtonCustom(
-                    onTap: () {
-                      SessionManager.instance.setBool(SessionKeys.isLanguageScreenSelect, true);
-                      if ((controller.setting?.onBoarding ?? []).isEmpty) {
-                        Get.off(() => const LoginScreen());
-                      } else {
-                        Get.off(() => const OnBoardingScreen());
-                      }
-                    },
-                    title: LKey.continueText.tr,
-                    margin: const EdgeInsets.all(15),
+                  SafeArea(
+                    top: false,
+                    child: TextButtonCustom(
+                      onTap: () {
+                        SessionManager.instance
+                            .setBool(SessionKeys.isLanguageScreenSelect, true);
+                        if ((controller.setting?.onBoarding ?? []).isEmpty) {
+                          Get.off(() => const LoginScreen());
+                        } else {
+                          Get.off(() => const OnBoardingScreen());
+                        }
+                      },
+                      title: LKey.continueText.tr,
+                      margin: const EdgeInsetsDirectional.fromSTEB(16, 4, 16, 16),
+                    ),
                   )
               ],
             ),
@@ -160,5 +137,58 @@ class SelectLanguageScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildHeader(BuildContext context) {
+    switch (languageNavigationType) {
+      case LanguageNavigationType.fromStart:
+        return Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(16, 14, 16, 6),
+          child: Row(
+            children: [
+              Container(
+                width: 52,
+                height: 52,
+                padding: const EdgeInsets.all(11),
+                decoration: BoxDecoration(
+                  color: whitePure(context).withValues(alpha: .18),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Image.asset(AssetRes.icLanguage),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      LKey.select.tr.toUpperCase(),
+                      style: TextStyleCustom.unboundedBlack900(
+                          fontSize: 18, color: whitePure(context)),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      LKey.language.tr.toUpperCase(),
+                      style: TextStyleCustom.unboundedBlack900(
+                        fontSize: 18,
+                        color: whitePure(context),
+                        opacity: .65,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        );
+      case LanguageNavigationType.fromSetting:
+        return CustomAppBar(
+          title: LKey.languages.tr,
+          titleStyle: TextStyleCustom.unboundedSemiBold600(
+              fontSize: 15, color: whitePure(context)),
+          bgColor: Colors.transparent,
+          iconColor: whitePure(context),
+        );
+    }
   }
 }

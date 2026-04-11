@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:proste_indexed_stack/proste_indexed_stack.dart';
 import 'package:flayr/common/widget/banner_ads_custom.dart';
-import 'package:flayr/common/widget/gradient_border.dart';
-import 'package:flayr/common/widget/gradient_icon.dart';
 import 'package:flayr/model/user_model/user_model.dart';
 import 'package:flayr/screen/dashboard_screen/dashboard_screen_controller.dart';
 import 'package:flayr/screen/explore_screen/explore_screen.dart';
@@ -37,19 +35,24 @@ class DashboardScreen extends StatelessWidget {
                 index: controller.selectedPageIndex.value,
                 children: [
                   IndexedStackChild(child: const HomeScreen(), preload: true),
-                  IndexedStackChild(child: FeedScreen(myUser: myUser), preload: true),
-                  IndexedStackChild(child: const LiveStreamSearchScreen(), preload: true),
+                  IndexedStackChild(
+                      child: FeedScreen(myUser: myUser), preload: true),
+                  IndexedStackChild(
+                      child: const LiveStreamSearchScreen(), preload: true),
                   IndexedStackChild(child: const ExploreScreen(), preload: true),
                   IndexedStackChild(child: const MessageScreen(), preload: true),
                   IndexedStackChild(
-                      child: ProfileScreen(isDashBoard: false, user: myUser,
-                          isTopBarVisible: false),
-                      preload: true)
+                    child: ProfileScreen(
+                      isDashBoard: false,
+                      user: myUser,
+                      isTopBarVisible: false,
+                    ),
+                    preload: true,
+                  )
                 ],
               ),
             ),
-            if (controller.selectedPageIndex.value != 0)
-              const BannerAdsCustom(),
+            if (controller.selectedPageIndex.value != 0) const BannerAdsCustom(),
           ],
         );
       }),
@@ -60,31 +63,59 @@ class DashboardScreen extends StatelessWidget {
   Widget _buildBottomNavigationBar(
       BuildContext context, DashboardScreenController controller) {
     return Obx(() {
-      PostUploadingProgress postUpload = controller.postProgress.value;
-      bool isPostUploading =
-          postUpload.uploadType == UploadType.none ? false : true;
+      final postUpload = controller.postProgress.value;
+      final isPostUploading = postUpload.uploadType != UploadType.none;
+
       return AnimatedContainer(
-        duration: const Duration(milliseconds: 100),
+        duration: const Duration(milliseconds: 120),
         color: blackPure(context),
-        padding: const EdgeInsets.only(top: 5),
+        padding: const EdgeInsets.only(top: 4),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: List.generate(
-                controller.bottomIconList.length,
-                (index) {
-                  return _buildBottomNavItem(
-                      context, controller, index, isPostUploading);
-                },
+            NavigationBarTheme(
+              data: NavigationBarThemeData(
+                height: 64,
+                backgroundColor: blackPure(context),
+                indicatorColor: themeAccentSolid(context).withValues(alpha: .18),
+                labelTextStyle: WidgetStatePropertyAll(
+                  TextStyleCustom.outFitRegular400(
+                    fontSize: 10,
+                    color: whitePure(context),
+                  ),
+                ),
+              ),
+              child: NavigationBar(
+                selectedIndex: controller.selectedPageIndex.value,
+                animationDuration: const Duration(milliseconds: 250),
+                labelBehavior:
+                    NavigationDestinationLabelBehavior.alwaysHide,
+                onDestinationSelected: controller.onChanged,
+                destinations: List.generate(
+                  controller.bottomIconList.length,
+                  (index) => NavigationDestination(
+                    label: '',
+                    icon: _buildDestinationIcon(
+                      context: context,
+                      controller: controller,
+                      index: index,
+                      isSelected: false,
+                    ),
+                    selectedIcon: _buildDestinationIcon(
+                      context: context,
+                      controller: controller,
+                      index: index,
+                      isSelected: true,
+                    ),
+                  ),
+                ),
               ),
             ),
             SafeArea(
               top: false,
-              bottom: isPostUploading ? true : false,
+              bottom: isPostUploading,
               child: AnimatedContainer(
-                duration: const Duration(milliseconds: 100),
+                duration: const Duration(milliseconds: 120),
                 height: isPostUploading ? 30 : 0,
                 margin: Platform.isAndroid || !isPostUploading
                     ? EdgeInsets.zero
@@ -93,16 +124,22 @@ class DashboardScreen extends StatelessWidget {
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
-                    Container(height: 30, decoration: BoxDecoration(gradient: StyleRes.themeGradient)),
+                    Container(
+                      height: 30,
+                      decoration:
+                          BoxDecoration(gradient: StyleRes.themeGradient),
+                    ),
                     Align(
                       alignment: AlignmentDirectional.centerEnd,
                       child: LayoutBuilder(builder: (context, constraints) {
-                        double progress = (constraints.maxWidth * postUpload.progress) / 100;
+                        final progress =
+                            (constraints.maxWidth * postUpload.progress) / 100;
                         return AnimatedContainer(
                           height: 30,
                           width: constraints.maxWidth - progress,
                           duration: const Duration(milliseconds: 250),
-                          decoration: BoxDecoration(color: textDarkGrey(context)),
+                          decoration:
+                              BoxDecoration(color: textDarkGrey(context)),
                         );
                       }),
                     ),
@@ -110,16 +147,22 @@ class DashboardScreen extends StatelessWidget {
                       alignment: Alignment.center,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           if (postUpload.uploadType != UploadType.error)
-                            Text('${postUpload.progress.toInt()}%',
-                                style: TextStyleCustom.outFitMedium500(
-                                  color: whitePure(context),
-                                  fontSize: 16,
-                                )),
-                          Text(' ${postUpload.uploadType.title(postUpload.type)}',
-                              style: TextStyleCustom.outFitLight300(color: whitePure(context), fontSize: 14)),
+                            Text(
+                              '${postUpload.progress.toInt()}%',
+                              style: TextStyleCustom.outFitMedium500(
+                                color: whitePure(context),
+                                fontSize: 16,
+                              ),
+                            ),
+                          Text(
+                            ' ${postUpload.uploadType.title(postUpload.type)}',
+                            style: TextStyleCustom.outFitLight300(
+                              color: whitePure(context),
+                              fontSize: 14,
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -133,53 +176,63 @@ class DashboardScreen extends StatelessWidget {
     });
   }
 
-  Widget _buildBottomNavItem(BuildContext context,
-      DashboardScreenController controller, int index, bool isPostUploading) {
-    return Obx(() {
-      final isSelected = controller.selectedPageIndex.value == index;
-      final scaleValue = isSelected ? controller.scaleValue.value : 1.0;
+  Widget _buildDestinationIcon({
+    required BuildContext context,
+    required DashboardScreenController controller,
+    required int index,
+    required bool isSelected,
+  }) {
+    final navIcon = controller.bottomIconList[index];
+    final scaleValue = isSelected ? controller.scaleValue.value : 1.0;
 
-      return SafeArea(
-        bottom: isPostUploading ? false : true,
-        child: GradientBorder(
-          onPressed: () => controller.onChanged(index),
-          strokeWidth: isSelected ? 2 : 0,
-          radius: 30,
-          gradient: isSelected ? StyleRes.themeGradient : null,
-          child: Padding(
-            padding: const EdgeInsets.all(3),
-            child: AnimatedScale(
-              scale: scaleValue,
-              duration: const Duration(milliseconds: 300),
-              child: Stack(
-                alignment: Alignment.center,
-                children: [
-                  GradientIcon(
-                    gradient:
-                        isSelected ? null : StyleRes.textDarkGreyGradient(),
-                    child: Image.asset(controller.bottomIconList[index],
-                        height: 38, width: 38),
-                  ),
-                  if (index == 4) _buildUnreadCount(controller, context),
-                  // Moved to a separate function
-                ],
-              ),
-            ),
-          ),
-        ),
+    Widget icon = AnimatedScale(
+      scale: scaleValue,
+      duration: const Duration(milliseconds: 250),
+      child: Icon(
+        isSelected ? navIcon.filled : navIcon.outlined,
+        size: 25,
+        color: isSelected ? whitePure(context) : textLightGrey(context),
+      ),
+    );
+
+    if (index == 4) {
+      icon = Stack(
+        clipBehavior: Clip.none,
+        alignment: Alignment.center,
+        children: [
+          icon,
+          PositionedDirectional(
+            top: -6,
+            end: -8,
+            child: _buildUnreadBadge(controller, context),
+          )
+        ],
       );
-    });
+    }
+
+    return icon;
   }
 
-  Widget _buildUnreadCount(
+  Widget _buildUnreadBadge(
       DashboardScreenController controller, BuildContext context) {
-    return Obx(() {
-      final count = controller.unReadCount.value;
-      return count > 0
-          ? Text(count > 9 ? '9+' : '$count',
-              style: TextStyleCustom.outFitRegular400(
-                  color: whitePure(context), fontSize: 12))
-          : const SizedBox();
-    });
+    final count = controller.unReadCount.value;
+    if (count <= 0) return const SizedBox.shrink();
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 1),
+      constraints: const BoxConstraints(minWidth: 16),
+      decoration: BoxDecoration(
+        color: Colors.redAccent,
+        borderRadius: BorderRadius.circular(10),
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        count > 9 ? '9+' : '$count',
+        style: TextStyleCustom.outFitMedium500(
+          color: whitePure(context),
+          fontSize: 10,
+        ),
+      ),
+    );
   }
 }

@@ -138,7 +138,8 @@ class SettingsScreenController extends BaseController {
         try {
           StatusModel result = await UserService.instance.logoutUser();
           if (result.status == true) {
-            GoogleSignIn.instance.signOut();
+            await auth.FirebaseAuth.instance.signOut();
+            await GoogleSignIn.instance.signOut();
             SessionManager.instance.clearSomeKey();
             Get.offAll(() => const LoginScreen());
           } else {

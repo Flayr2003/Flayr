@@ -9,6 +9,7 @@ import 'package:flayr/common/extensions/string_extension.dart';
 import 'package:flayr/common/manager/logger.dart';
 import 'package:flayr/common/manager/session_manager.dart';
 import 'package:flayr/common/service/api/common_service.dart';
+import 'package:flayr/common/service/auth/firebase_user_sync_service.dart';
 import 'package:flayr/common/service/api/user_service.dart';
 import 'package:flayr/common/service/network_helper/network_helper.dart';
 import 'package:flayr/common/widget/no_internet_sheet.dart';
@@ -72,9 +73,15 @@ class SplashScreenController extends BaseController {
 
       RestartWidget.restartApp(Get.context!);
       if (SessionManager.instance.isLogin()) {
-        UserService.instance.fetchUserDetails(userId: SessionManager.instance.getUserID()).then((value) {
+        UserService.instance
+            .fetchUserDetails(userId: SessionManager.instance.getUserID())
+            .then((value) async {
           if (value != null) {
-            Get.off(() => DashboardScreen(myUser: value));
+            final syncedUser = FirebaseUserSyncService.enrichUserWithFirebaseData(
+              appUser: value,
+              persistInSession: true,
+            );
+            Get.off(() => DashboardScreen(myUser: syncedUser ?? value));
           } else {
             Get.off(() => const LoginScreen());
           }

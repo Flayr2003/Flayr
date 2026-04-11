@@ -1,12 +1,12 @@
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:flayr/common/controller/base_controller.dart';
 import 'package:flayr/common/manager/ads_manager.dart';
 import 'package:flayr/common/manager/logger.dart';
 import 'package:flayr/common/manager/session_manager.dart';
 import 'package:flayr/common/widget/eula_sheet.dart';
-import 'package:flayr/common/widget/restart_widget.dart';
 import 'package:flayr/model/general/settings_model.dart';
 import 'package:flayr/screen/select_language_screen/select_language_screen.dart';
 
@@ -47,22 +47,24 @@ class SelectLanguageScreenController extends BaseController {
   }
 
   void initLanguage() {
-    List<Language> items =
-        SessionManager.instance.getSettings()?.languages ?? [];
-    items.sort((a, b) => (a.title ?? '').compareTo(b.title ?? ''));
-    for (Language element in items) {
-      if (element.status == 1) {
-        languages.add(element);
-      }
-    }
-    selectedLanguage.value = languages.firstWhere((element) {
-      return element.code == SessionManager.instance.getLang();
-    }) as Language?;
+    final items = SessionManager.instance.getSettings()?.languages ?? [];
+    final activeLanguages = items.where((element) => element.status == 1).toList()
+      ..sort((a, b) => (a.title ?? '').compareTo(b.title ?? ''));
+
+    languages.assignAll(activeLanguages);
+
+    final currentLangCode = SessionManager.instance.getLang();
+    selectedLanguage.value =
+        languages.firstWhereOrNull((element) => element.code == currentLangCode) ??
+            (languages.isNotEmpty ? languages.first : null);
   }
 
   void onLanguageChange(Language? value) {
+    if (value == null) return;
+
     selectedLanguage.value = value;
-    SessionManager.instance.setLang(value?.code ?? 'en');
-    RestartWidget.restartApp(Get.context!);
+    final langCode = value.code ?? 'en';
+    SessionManager.instance.setLang(langCode);
+    Get.updateLocale(Locale(langCode));
   }
 }

@@ -6,6 +6,7 @@ import 'package:flayr/common/controller/base_controller.dart';
 import 'package:flayr/common/manager/firebase_notification_manager.dart';
 import 'package:flayr/common/manager/logger.dart';
 import 'package:flayr/common/manager/session_manager.dart';
+import 'package:flayr/common/service/auth/firebase_user_sync_service.dart';
 import 'package:flayr/common/service/api/user_service.dart';
 import 'package:flayr/languages/languages_keys.dart';
 import 'package:flayr/model/user_model/user_model.dart' as user;
@@ -105,12 +106,19 @@ class AuthScreenController extends BaseController {
           fullName: userCredential.user!.displayName ?? '',
           identity: userCredential.user!.uid,
           loginMethod: LoginMethod.google,
-          deviceToken: await FirebaseNotificationManager.instance.getNotificationToken() ?? '',
+          deviceToken:
+              await FirebaseNotificationManager.instance.getNotificationToken() ??
+                  '',
         );
 
         stopLoader();
         if (userData != null) {
-          _navigateScreen(userData);
+          final mergedUser = FirebaseUserSyncService.enrichUserWithFirebaseData(
+            appUser: userData,
+            firebaseUser: userCredential.user,
+            persistInSession: true,
+          );
+          _navigateScreen(mergedUser ?? userData);
         }
       } else {
         stopLoader();
@@ -187,6 +195,7 @@ class AuthScreenController extends BaseController {
   void _navigateScreen(user.User data) {
     SessionManager.instance.setUser(data);
     SessionManager.instance.setAuthToken(data.token);
+    SessionManager.instance.setLogin(true);
     Get.offAll(() => DashboardScreen(myUser: data));
   }
 

@@ -12,7 +12,6 @@ import 'package:flayr/common/manager/logger.dart';
 import 'package:flayr/common/manager/session_manager.dart';
 import 'package:flayr/common/service/api/user_service.dart';
 import 'package:flayr/common/service/subscription/subscription_manager.dart';
-import 'package:flayr/common/widget/restart_widget.dart';
 import 'package:flayr/languages/languages_keys.dart';
 import 'package:flayr/model/chat/chat_thread.dart';
 import 'package:flayr/model/general/settings_model.dart';
@@ -20,18 +19,17 @@ import 'package:flayr/model/user_model/user_model.dart';
 import 'package:flayr/screen/camera_screen/camera_screen.dart';
 import 'package:flayr/screen/feed_screen/feed_screen_controller.dart';
 import 'package:flayr/screen/gif_sheet/gif_sheet_controller.dart';
-import 'package:flayr/utilities/asset_res.dart';
 import 'package:flayr/utilities/firebase_const.dart';
 import 'package:zego_express_engine/zego_express_engine.dart';
 
 class DashboardScreenController extends BaseController with GetSingleTickerProviderStateMixin {
-  List<String> bottomIconList = [
-    AssetRes.icReel,
-    AssetRes.icPost,
-    AssetRes.icLiveStream,
-    AssetRes.icSearch,
-    AssetRes.icChat,
-    AssetRes.icProfile
+  final List<DashboardNavIcon> bottomIconList = const [
+    DashboardNavIcon(outlined: Icons.ondemand_video_outlined, filled: Icons.ondemand_video),
+    DashboardNavIcon(outlined: Icons.dynamic_feed_outlined, filled: Icons.dynamic_feed),
+    DashboardNavIcon(outlined: Icons.live_tv_outlined, filled: Icons.live_tv),
+    DashboardNavIcon(outlined: Icons.travel_explore_outlined, filled: Icons.travel_explore),
+    DashboardNavIcon(outlined: Icons.mark_chat_unread_outlined, filled: Icons.mark_chat_unread),
+    DashboardNavIcon(outlined: Icons.account_circle_outlined, filled: Icons.account_circle),
   ];
   RxInt selectedPageIndex = 0.obs;
   RxDouble scaleValue = 1.0.obs;
@@ -163,16 +161,13 @@ class DashboardScreenController extends BaseController with GetSingleTickerProvi
   }
 
   Future<void> _fetchLanguageFromUser() async {
-    String savedLanguage = SessionManager.instance.getLang();
-    String userLanguage = user?.appLanguage ?? 'en';
-    if (userLanguage != savedLanguage) {
-      // Only sync if we have a valid user language from server
-      if (userLanguage.isNotEmpty) {
-        SessionManager.instance.setLang(userLanguage);
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          RestartWidget.restartApp(Get.context!);
-        });
-      }
+    final selectedLanguage = SessionManager.instance.getLang();
+    if (selectedLanguage.isEmpty) return;
+
+    if (Get.locale?.languageCode != selectedLanguage) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Get.updateLocale(Locale(selectedLanguage));
+      });
     }
   }
 
@@ -203,6 +198,14 @@ class DashboardScreenController extends BaseController with GetSingleTickerProvi
     }
   }
 }
+
+class DashboardNavIcon {
+  final IconData outlined;
+  final IconData filled;
+
+  const DashboardNavIcon({required this.outlined, required this.filled});
+}
+
 
 class PostUploadingProgress {
   final CameraScreenType type;

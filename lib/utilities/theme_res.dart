@@ -3,22 +3,23 @@ import 'package:flayr/utilities/color_res.dart';
 import 'package:flayr/utilities/font_res.dart';
 
 class ThemeRes {
-  /// Theme light mode
-
   static ThemeData lightTheme(BuildContext context) {
     return ThemeData(
+      useMaterial3: true,
       scaffoldBackgroundColor: ColorRes.whitePure,
-      bottomNavigationBarTheme: const BottomNavigationBarThemeData(
-          backgroundColor: ColorRes.whitePure),
+      navigationBarTheme: const NavigationBarThemeData(
+        backgroundColor: ColorRes.blackPure,
+      ),
       appBarTheme: const AppBarTheme(backgroundColor: ColorRes.bgLightGrey),
       fontFamily: FontRes.outFitRegular400,
       bottomSheetTheme:
           const BottomSheetThemeData(backgroundColor: ColorRes.whitePure),
       sliderTheme: const SliderThemeData(
-          trackHeight: 2.5,
-          trackShape: RectangularSliderTrackShape(),
-          overlayShape: RoundSliderOverlayShape(overlayRadius: 0),
-          overlayColor: Colors.transparent),
+        trackHeight: 2.5,
+        trackShape: RectangularSliderTrackShape(),
+        overlayShape: RoundSliderOverlayShape(overlayRadius: 0),
+        overlayColor: Colors.transparent,
+      ),
       textTheme: const TextTheme(
         titleLarge: TextStyle(color: ColorRes.whitePure),
         titleMedium: TextStyle(color: ColorRes.textDarkGrey),
@@ -36,14 +37,39 @@ class ThemeRes {
       cardColor: ColorRes.bgMediumGrey,
       primaryColorDark: ColorRes.blackPure,
       canvasColor: ColorRes.themeColor,
-      useMaterial3: false,
     );
   }
 
-  /// Theme dark mode
-
   static ThemeData darkTheme(BuildContext context) {
-    return ThemeData();
+    return ThemeData(
+      useMaterial3: true,
+      scaffoldBackgroundColor: ColorRes.themeColor,
+      appBarTheme: const AppBarTheme(backgroundColor: ColorRes.blackPure),
+      fontFamily: FontRes.outFitRegular400,
+      navigationBarTheme: const NavigationBarThemeData(
+        backgroundColor: ColorRes.blackPure,
+      ),
+      bottomSheetTheme:
+          const BottomSheetThemeData(backgroundColor: Color(0xFF1B1C20)),
+      textTheme: const TextTheme(
+        titleLarge: TextStyle(color: ColorRes.whitePure),
+        titleMedium: TextStyle(color: ColorRes.whitePure),
+        titleSmall: TextStyle(color: ColorRes.disabledGrey),
+        labelSmall: TextStyle(color: ColorRes.themeAccentSolid),
+        labelLarge: TextStyle(color: ColorRes.disabledGrey),
+      ),
+      textSelectionTheme: const TextSelectionThemeData(
+        selectionColor: Color(0xFF3A3A3A),
+      ),
+      cardTheme: const CardThemeData(color: Color(0xFF24262B)),
+      primaryColor: ColorRes.themeAccentSolid,
+      dividerColor: const Color(0xFF2B2D33),
+      cardColor: const Color(0xFF1F2126),
+      primaryColorDark: ColorRes.blackPure,
+      canvasColor: ColorRes.themeColor,
+      splashColor: Colors.transparent,
+      highlightColor: Colors.transparent,
+    );
   }
 }
 
@@ -53,7 +79,7 @@ Color whitePure(BuildContext context) {
 
 Color textDarkGrey(BuildContext context) {
   return Theme.of(context).textTheme.titleMedium?.color ??
-      textDarkGrey(context);
+      ColorRes.textDarkGrey;
 }
 
 Color textLightGrey(BuildContext context) {
@@ -67,7 +93,7 @@ Color bgGrey(BuildContext context) {
 
 Color themeAccentSolid(BuildContext context) {
   return Theme.of(context).textTheme.labelSmall?.color ??
-      themeAccentSolid(context);
+      ColorRes.themeAccentSolid;
 }
 
 Color disableGrey(BuildContext context) {
@@ -79,7 +105,7 @@ Color scaffoldBackgroundColor(BuildContext context) {
 }
 
 Color blueFollow(BuildContext context) {
-  return Theme.of(context).cardTheme.color ?? blueFollow(context);
+  return Theme.of(context).cardTheme.color ?? ColorRes.blueFollow;
 }
 
 Color bgMediumGrey(BuildContext context) {

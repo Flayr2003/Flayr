@@ -16,7 +16,16 @@ import 'package:url_launcher/url_launcher.dart';
 
 extension StringExtention on String {
   String addBaseURL() {
-    return (SessionManager.instance.getSettings()?.itemBaseUrl ?? '') + this;
+    final value = trim();
+    if (value.isEmpty) {
+      return '';
+    }
+
+    if (value.startsWith('http://') || value.startsWith('https://')) {
+      return value;
+    }
+
+    return (SessionManager.instance.getSettings()?.itemBaseUrl ?? '') + value;
   }
 
   Future<StatusModel> get lunchUrlWithHttps async {

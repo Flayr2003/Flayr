@@ -26,7 +26,7 @@ class SelectedMusicSheet extends StatelessWidget {
     final controller = Get.put(
         SelectedMusicSheetController(totalVideoSecond * 1000, selectedMusic));
     return Container(
-        margin: EdgeInsets.only(top: AppBar().preferredSize.height * 2),
+        margin: EdgeInsetsDirectional.only(top: AppBar().preferredSize.height * 2),
         decoration: ShapeDecoration(
             color: whitePure(context),
             shape: const SmoothRectangleBorder(
@@ -62,7 +62,7 @@ class SelectedMusicSheet extends StatelessWidget {
                       child: FittedBox(
                         child: Container(
                           height: 30,
-                          margin: const EdgeInsets.only(top: 22, bottom: 12),
+                          margin: const EdgeInsetsDirectional.only(top: 22, bottom: 12),
                           padding: const EdgeInsets.symmetric(horizontal: 22),
                           decoration: ShapeDecoration(
                             color: bgGrey(context),
