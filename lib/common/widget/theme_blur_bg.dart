@@ -5,26 +5,18 @@ class ThemeBlurBg extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Container(
       height: double.infinity,
       width: double.infinity,
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: isDark
-              ? const [
-                  Color(0xFF000000),
-                  Color(0xFF101010),
-                  Color(0xFF000000),
-                ]
-              : const [
-                  Color(0xFFFFFFFF),
-                  Color(0xFFF4F5F7),
-                  Color(0xFFEDEFF3),
-                ],
+          colors: [
+            Color(0xFF000000),
+            Color(0xFF050505),
+            Color(0xFF000000),
+          ],
         ),
       ),
     );

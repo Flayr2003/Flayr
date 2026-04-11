@@ -4,53 +4,22 @@ import 'package:flayr/utilities/font_res.dart';
 
 class ThemeRes {
   static ThemeData lightTheme(BuildContext context) {
-    return ThemeData(
-      useMaterial3: true,
-      scaffoldBackgroundColor: ColorRes.whitePure,
-      navigationBarTheme: const NavigationBarThemeData(
-        backgroundColor: ColorRes.whitePure,
-      ),
-      appBarTheme: const AppBarTheme(backgroundColor: ColorRes.bgLightGrey),
-      fontFamily: FontRes.outFitRegular400,
-      bottomSheetTheme:
-          const BottomSheetThemeData(backgroundColor: ColorRes.whitePure),
-      sliderTheme: const SliderThemeData(
-        trackHeight: 2.5,
-        trackShape: RectangularSliderTrackShape(),
-        overlayShape: RoundSliderOverlayShape(overlayRadius: 0),
-        overlayColor: Colors.transparent,
-      ),
-      textTheme: const TextTheme(
-        titleLarge: TextStyle(color: ColorRes.whitePure),
-        titleMedium: TextStyle(color: ColorRes.textDarkGrey),
-        titleSmall: TextStyle(color: ColorRes.textLightGrey),
-        labelSmall: TextStyle(color: ColorRes.blackPure),
-        labelLarge: TextStyle(color: ColorRes.disabledGrey),
-      ),
-      textSelectionTheme:
-          const TextSelectionThemeData(selectionColor: ColorRes.disabledGrey),
-      cardTheme: const CardThemeData(color: ColorRes.blueFollow),
-      splashColor: Colors.transparent,
-      highlightColor: Colors.transparent,
-      primaryColor: ColorRes.themeAccentSolid,
-      dividerColor: ColorRes.bgGrey,
-      cardColor: ColorRes.bgMediumGrey,
-      primaryColorDark: ColorRes.blackPure,
-      canvasColor: ColorRes.whitePure,
-    );
+    // Light theme redirects to dark for all-black experience
+    return darkTheme(context);
   }
 
   static ThemeData darkTheme(BuildContext context) {
     return ThemeData(
       useMaterial3: true,
-      scaffoldBackgroundColor: ColorRes.themeColor,
+      brightness: Brightness.dark,
+      scaffoldBackgroundColor: ColorRes.blackPure,
       appBarTheme: const AppBarTheme(backgroundColor: ColorRes.blackPure),
       fontFamily: FontRes.outFitRegular400,
       navigationBarTheme: const NavigationBarThemeData(
         backgroundColor: ColorRes.blackPure,
       ),
       bottomSheetTheme:
-          const BottomSheetThemeData(backgroundColor: Color(0xFF1B1C20)),
+          const BottomSheetThemeData(backgroundColor: Color(0xFF0D0D0D)),
       textTheme: const TextTheme(
         titleLarge: TextStyle(color: ColorRes.whitePure),
         titleMedium: TextStyle(color: ColorRes.whitePure),
@@ -59,14 +28,14 @@ class ThemeRes {
         labelLarge: TextStyle(color: Color(0xFFB5BAC3)),
       ),
       textSelectionTheme: const TextSelectionThemeData(
-        selectionColor: Color(0xFF3A3A3A),
+        selectionColor: Color(0xFF2A2A2A),
       ),
-      cardTheme: const CardThemeData(color: Color(0xFF24262B)),
-      primaryColor: ColorRes.themeAccentSolid,
-      dividerColor: const Color(0xFF2B2D33),
-      cardColor: const Color(0xFF1F2126),
+      cardTheme: const CardThemeData(color: Color(0xFF141414)),
+      primaryColor: ColorRes.blackPure,
+      dividerColor: const Color(0xFF1A1A1A),
+      cardColor: const Color(0xFF0A0A0A),
       primaryColorDark: ColorRes.blackPure,
-      canvasColor: ColorRes.themeColor,
+      canvasColor: ColorRes.blackPure,
       splashColor: Colors.transparent,
       highlightColor: Colors.transparent,
     );

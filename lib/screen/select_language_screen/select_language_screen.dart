@@ -25,16 +25,16 @@ class SelectLanguageScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller =
         Get.put(SelectLanguageScreenController(languageNavigationType));
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
+      backgroundColor: Colors.black,
       body: Stack(
         children: [
           const ThemeBlurBg(),
           SafeArea(
             child: Column(
               children: [
-                _buildHeader(context, isDark),
+                _buildHeader(context),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 12),
@@ -42,7 +42,7 @@ class SelectLanguageScreen extends StatelessWidget {
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: ShapeDecoration(
-                        color: isDark ? const Color(0xFF121212) : Colors.white,
+                        color: const Color(0xFF0A0A0A),
                         shape: SmoothRectangleBorder(
                           borderRadius:
                               SmoothBorderRadius(cornerRadius: 20, cornerSmoothing: 1),
@@ -63,8 +63,8 @@ class SelectLanguageScreen extends StatelessWidget {
 
                             return Material(
                               color: isSelected
-                                  ? (isDark ? const Color(0xFF000000) : const Color(0xFFECECEC))
-                                  : (isDark ? const Color(0xFF1B1B1B) : const Color(0xFFF7F7F7)),
+                                  ? Colors.white.withValues(alpha: .1)
+                                  : const Color(0xFF111111),
                               borderRadius: BorderRadius.circular(14),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(14),
@@ -78,9 +78,9 @@ class SelectLanguageScreen extends StatelessWidget {
                                         isSelected
                                             ? Icons.radio_button_checked
                                             : Icons.radio_button_unchecked,
-                                        color: isDark
-                                            ? (isSelected ? Colors.white : Colors.white70)
-                                            : (isSelected ? Colors.black : Colors.black54),
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.white54,
                                         size: 22,
                                       ),
                                       const SizedBox(width: 12),
@@ -94,7 +94,7 @@ class SelectLanguageScreen extends StatelessWidget {
                                               style:
                                                   TextStyleCustom.outFitMedium500(
                                                 fontSize: 15,
-                                                color: isDark ? Colors.white : Colors.black,
+                                                color: Colors.white,
                                               ),
                                             ),
                                             const SizedBox(height: 2),
@@ -103,7 +103,7 @@ class SelectLanguageScreen extends StatelessWidget {
                                               style:
                                                   TextStyleCustom.outFitRegular400(
                                                 fontSize: 13,
-                                                color: isDark ? Colors.white70 : Colors.black54,
+                                                color: Colors.white54,
                                               ),
                                             ),
                                           ],
@@ -135,8 +135,8 @@ class SelectLanguageScreen extends StatelessWidget {
                       },
                       title: LKey.continueText.tr,
                       margin: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                      backgroundColor: const Color(0xFF2B2E34),
-                      titleColor: Colors.white,
+                      backgroundColor: Colors.white,
+                      titleColor: Colors.black,
                     ),
                   )
               ],
@@ -147,7 +147,7 @@ class SelectLanguageScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context, bool isDark) {
+  Widget _buildHeader(BuildContext context) {
     switch (languageNavigationType) {
       case LanguageNavigationType.fromStart:
         return Padding(
@@ -159,9 +159,7 @@ class SelectLanguageScreen extends StatelessWidget {
                 height: 52,
                 padding: const EdgeInsets.all(11),
                 decoration: BoxDecoration(
-                  color: isDark
-                      ? whitePure(context).withValues(alpha: .18)
-                      : Colors.black.withValues(alpha: .08),
+                  color: Colors.white.withValues(alpha: .1),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Image.asset(AssetRes.icLanguage),
@@ -174,15 +172,14 @@ class SelectLanguageScreen extends StatelessWidget {
                     Text(
                       LKey.select.tr.toUpperCase(),
                       style: TextStyleCustom.unboundedBlack900(
-                          fontSize: 18,
-                          color: isDark ? whitePure(context) : Colors.black),
+                          fontSize: 18, color: Colors.white),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       LKey.language.tr.toUpperCase(),
                       style: TextStyleCustom.unboundedBlack900(
                         fontSize: 18,
-                        color: isDark ? whitePure(context) : Colors.black,
+                        color: Colors.white,
                         opacity: .65,
                       ),
                     ),
@@ -196,9 +193,9 @@ class SelectLanguageScreen extends StatelessWidget {
         return CustomAppBar(
           title: LKey.languages.tr,
           titleStyle: TextStyleCustom.unboundedSemiBold600(
-              fontSize: 15, color: isDark ? whitePure(context) : Colors.black),
+              fontSize: 15, color: Colors.white),
           bgColor: Colors.transparent,
-          iconColor: isDark ? whitePure(context) : Colors.black,
+          iconColor: Colors.white,
         );
     }
   }

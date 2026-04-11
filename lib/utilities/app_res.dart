@@ -2,7 +2,7 @@ import 'package:get/get.dart';
 import 'package:flayr/languages/languages_keys.dart';
 
 class AppRes {
-  static String appName = 'Shortzz';
+  static String appName = 'Flayr';
 
   static String gifBrandName = 'GIPHY';
 

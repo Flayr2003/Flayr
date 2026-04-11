@@ -20,6 +20,7 @@ class RegistrationScreen extends StatelessWidget {
     final controller = Get.find<AuthScreenController>();
 
     return Scaffold(
+      backgroundColor: Colors.black,
       resizeToAvoidBottomInset: true,
       body: SafeArea(
         child: LayoutBuilder(
@@ -50,16 +51,15 @@ class RegistrationScreen extends StatelessWidget {
                             LKey.signUp.tr.toUpperCase(),
                             style: TextStyleCustom.unboundedBlack900(
                               fontSize: 24,
-                              color: textDarkGrey(context),
+                              color: Colors.white,
                             ).copyWith(letterSpacing: -.2),
                           ),
                           const SizedBox(height: 4),
-                          GradientText(
+                          Text(
                             LKey.startJourney.tr.toUpperCase(),
-                            gradient: StyleRes.themeGradient,
                             style: TextStyleCustom.unboundedBlack900(
                               fontSize: 24,
-                              color: textDarkGrey(context),
+                              color: Colors.white54,
                             ).copyWith(letterSpacing: -.2),
                           ),
                         ],
@@ -91,16 +91,16 @@ class RegistrationScreen extends StatelessWidget {
                             ? () {}
                             : controller.onCreateAccount,
                         title: LKey.createAccount.tr,
-                        backgroundColor: const Color(0xFF2B2E34),
+                        backgroundColor: Colors.white,
                         horizontalMargin: 20,
-                        titleColor: whitePure(context),
+                        titleColor: Colors.black,
                         child: controller.isCredentialSubmitting.value
                             ? const SizedBox(
                                 height: 22,
                                 width: 22,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2.4,
-                                  color: Colors.white,
+                                  color: Colors.black,
                                 ),
                               )
                             : null,
@@ -110,7 +110,10 @@ class RegistrationScreen extends StatelessWidget {
                     const SafeArea(
                       top: false,
                       maintainBottomViewPadding: true,
-                      child: PrivacyPolicyText(),
+                      child: PrivacyPolicyText(
+                        boldTextColor: Colors.white70,
+                        regularTextColor: Colors.white38,
+                      ),
                     ),
                     const SizedBox(height: 8),
                   ],

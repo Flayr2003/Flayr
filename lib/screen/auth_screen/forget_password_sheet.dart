@@ -18,11 +18,11 @@ class ForgetPasswordSheet extends StatelessWidget {
     return Container(
       height: 400,
       margin: EdgeInsets.only(top: AppBar().preferredSize.height * 2.5),
-      decoration: ShapeDecoration(
-          shape: const SmoothRectangleBorder(
+      decoration: const ShapeDecoration(
+          shape: SmoothRectangleBorder(
               borderRadius: SmoothBorderRadius.vertical(
                   top: SmoothRadius(cornerRadius: 40, cornerSmoothing: 1))),
-          color: scaffoldBackgroundColor(context)),
+          color: Color(0xFF0A0A0A)),
       child: SafeArea(
         minimum: const EdgeInsets.only(bottom: 10),
         child: Column(
@@ -42,10 +42,13 @@ class ForgetPasswordSheet extends StatelessWidget {
                     TextButtonCustom(
                         onTap: controller.forgetPassword,
                         title: LKey.forgetPassword.tr,
-                        backgroundColor: textDarkGrey(context),
-                        titleColor: whitePure(context),
+                        backgroundColor: Colors.white,
+                        titleColor: Colors.black,
                         margin: const EdgeInsets.all(15)),
-                    const PrivacyPolicyText(),
+                    const PrivacyPolicyText(
+                      boldTextColor: Colors.white70,
+                      regularTextColor: Colors.white38,
+                    ),
                   ],
                 ),
               ),

@@ -21,11 +21,9 @@ class LoginScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(AuthScreenController());
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final primaryTextColor = isDark ? Colors.white : Colors.black87;
-    final secondaryTextColor = isDark ? Colors.white70 : Colors.black54;
 
     return Scaffold(
+      backgroundColor: Colors.black,
       resizeToAvoidBottomInset: true,
       body: Container(
         decoration: const ShapeDecoration(
@@ -49,7 +47,8 @@ class LoginScreen extends StatelessWidget {
                 child: Column(
                   children: [
                     Padding(
-                      padding: const EdgeInsetsDirectional.only(start: 20, end: 20, top: 30),
+                      padding: const EdgeInsetsDirectional.only(
+                          start: 20, end: 20, top: 30),
                       child: Column(
                         children: [
                           Padding(
@@ -60,14 +59,15 @@ class LoginScreen extends StatelessWidget {
                                 text: LKey.signIn.tr.toUpperCase(),
                                 style: TextStyleCustom.unboundedBlack900(
                                   fontSize: 25,
-                                  color: primaryTextColor,
+                                  color: Colors.white,
                                 ).copyWith(letterSpacing: -.2),
                                 children: [
                                   TextSpan(
-                                    text: '\n${LKey.toContinue.tr}'.toUpperCase(),
+                                    text:
+                                        '\n${LKey.toContinue.tr}'.toUpperCase(),
                                     style: TextStyleCustom.unboundedBlack900(
                                       fontSize: 25,
-                                      color: secondaryTextColor,
+                                      color: Colors.white,
                                       opacity: .5,
                                     ),
                                   )
@@ -104,7 +104,7 @@ class LoginScreen extends StatelessWidget {
                                   LKey.forgetPassword.tr,
                                   style: TextStyleCustom.outFitRegular400(
                                     fontSize: 16,
-                                    color: primaryTextColor,
+                                    color: Colors.white70,
                                   ),
                                 ),
                               ),
@@ -118,13 +118,15 @@ class LoginScreen extends StatelessWidget {
                               title: LKey.logIn.tr,
                               btnHeight: 50,
                               horizontalMargin: 0,
+                              backgroundColor: Colors.white,
+                              titleColor: Colors.black,
                               child: controller.isCredentialSubmitting.value
                                   ? const SizedBox(
                                       height: 22,
                                       width: 22,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.4,
-                                        color: Colors.white,
+                                        color: Colors.black,
                                       ),
                                     )
                                   : null,
@@ -145,13 +147,11 @@ class LoginScreen extends StatelessWidget {
                         height: 48,
                         margin: const EdgeInsets.symmetric(vertical: 24),
                         alignment: Alignment.center,
-                        color: isDark
-                            ? whitePure(context).withValues(alpha: .2)
-                            : Colors.black.withValues(alpha: .06),
+                        color: Colors.white.withValues(alpha: .08),
                         child: Text(
                           LKey.createAccountHere.tr,
                           style: TextStyleCustom.outFitRegular400(
-                            color: secondaryTextColor,
+                            color: Colors.white70,
                             fontSize: 16,
                           ),
                         ),
@@ -163,7 +163,7 @@ class LoginScreen extends StatelessWidget {
                         children: [
                           Expanded(
                             child: CustomDivider(
-                              color: secondaryTextColor,
+                              color: Colors.white30,
                               height: .5,
                             ),
                           ),
@@ -174,13 +174,13 @@ class LoginScreen extends StatelessWidget {
                               LKey.continueWith.tr,
                               style: TextStyleCustom.outFitRegular400(
                                 fontSize: 16,
-                                color: secondaryTextColor,
+                                color: Colors.white54,
                               ),
                             ),
                           ),
                           Expanded(
                             child: CustomDivider(
-                              color: secondaryTextColor,
+                              color: Colors.white30,
                               height: .5,
                             ),
                           ),
@@ -203,12 +203,12 @@ class LoginScreen extends StatelessWidget {
                               onTap: controller.onGoogleTap,
                               isDisabled: controller.isGoogleSigningIn.value,
                               child: controller.isGoogleSigningIn.value
-                                  ? SizedBox(
+                                  ? const SizedBox(
                                       height: 24,
                                       width: 24,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2.4,
-                                        color: textDarkGrey(context),
+                                        color: Colors.black,
                                       ),
                                     )
                                   : Image.asset(AssetRes.icGoogle,
@@ -218,9 +218,9 @@ class LoginScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    PrivacyPolicyText(
-                      boldTextColor: primaryTextColor,
-                      regularTextColor: secondaryTextColor,
+                    const PrivacyPolicyText(
+                      boldTextColor: Colors.white70,
+                      regularTextColor: Colors.white38,
                     )
                   ],
                 ),
@@ -255,26 +255,19 @@ class _LoginSheetTextFieldState extends State<LoginSheetTextField> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final fieldTextColor = isDark ? Colors.white : Colors.black87;
-    final borderColor =
-        isDark ? Colors.white.withValues(alpha: .4) : Colors.black.withValues(alpha: .18);
-    final fieldBgColor =
-        isDark ? Colors.white.withValues(alpha: .10) : Colors.white.withValues(alpha: .92);
-
     return Container(
       decoration: ShapeDecoration(
           shape: SmoothRectangleBorder(
             borderRadius:
                 SmoothBorderRadius(cornerRadius: 10, cornerSmoothing: 1),
-            side: BorderSide(color: borderColor),
+            side: BorderSide(color: Colors.white.withValues(alpha: .15)),
             borderAlign: BorderAlign.inside,
           ),
-          color: fieldBgColor),
+          color: Colors.white.withValues(alpha: .06)),
       child: TextField(
         controller: widget.controller,
         style:
-            TextStyleCustom.outFitRegular400(color: fieldTextColor, fontSize: 16),
+            TextStyleCustom.outFitRegular400(color: Colors.white, fontSize: 16),
         onTapOutside: (event) => FocusManager.instance.primaryFocus?.unfocus(),
         obscureText: widget.isPasswordField && isHide,
         keyboardType: widget.keyboardType ?? TextInputType.text,
@@ -282,7 +275,7 @@ class _LoginSheetTextFieldState extends State<LoginSheetTextField> {
           border: InputBorder.none,
           hintText: widget.hintText,
           hintStyle: TextStyleCustom.outFitRegular400(
-              color: isDark ? Colors.white70 : Colors.black45, fontSize: 16),
+              color: Colors.white38, fontSize: 16),
           contentPadding: EdgeInsetsDirectional.only(
               start: 10, end: 10, top: widget.isPasswordField ? 2 : 0),
           suffixIconConstraints: const BoxConstraints(),
@@ -298,13 +291,13 @@ class _LoginSheetTextFieldState extends State<LoginSheetTextField> {
                         isHide ? AssetRes.icEye : AssetRes.icHideEye,
                         height: 24,
                         width: 35,
-                        color: isDark ? whitePure(context) : Colors.black87,
+                        color: Colors.white70,
                         key: UniqueKey()),
                   ),
                 )
               : null,
         ),
-        cursorColor: isDark ? whitePure(context) : Colors.black87,
+        cursorColor: Colors.white,
       ),
     );
   }
@@ -334,8 +327,8 @@ class SocialBtn extends StatelessWidget {
         child: Container(
           height: 57,
           width: 57,
-          decoration:
-              BoxDecoration(shape: BoxShape.circle, color: whitePure(context)),
+          decoration: const BoxDecoration(
+              shape: BoxShape.circle, color: Colors.white),
           alignment: Alignment.center,
           child: child ?? Image.asset(icon!, height: 32, width: 32),
         ),
