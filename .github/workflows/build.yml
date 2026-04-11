@@ -34,6 +34,18 @@ jobs:
       - name: Flutter pub get
         run: flutter pub get
 
+      - name: Accept Android SDK licenses and install required components
+        env:
+          ANDROID_HOME: /usr/local/lib/android/sdk
+        run: |
+          export ANDROID_SDK_ROOT="$ANDROID_HOME"
+          yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
+          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0" \
+            "ndk;29.0.14033849"
+
       - name: Build release APK
         run: flutter build apk --release
 
