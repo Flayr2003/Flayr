@@ -26,7 +26,7 @@ class MyRefreshIndicator extends StatelessWidget {
           return notification.depth == depth;
         },
         color: themeAccentSolid(context),
-        backgroundColor: whitePure(context),
+        backgroundColor: const Color(0xFF1A1A1A),
         triggerMode: RefreshIndicatorTriggerMode.onEdge,
         child: child,
       );

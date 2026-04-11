@@ -32,7 +32,7 @@ class _SendGiftDialogState extends State<SendGiftDialog> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      backgroundColor: whitePure(context),
+      backgroundColor: const Color(0xFF1A1A1A),
       shape: RoundedRectangleBorder(borderRadius: SmoothBorderRadius(cornerRadius: 20)),
       alignment: const Alignment(0, 0.4),
       child: AspectRatio(
@@ -40,7 +40,7 @@ class _SendGiftDialogState extends State<SendGiftDialog> {
         child: Container(
           decoration: ShapeDecoration(
               shape: SmoothRectangleBorder(borderRadius: SmoothBorderRadius(cornerRadius: 20)),
-              color: whitePure(context)),
+              color: const Color(0xFF1A1A1A)),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [

@@ -60,7 +60,7 @@ class CustomTabSwitcher extends StatelessWidget {
                         borderRadius: SmoothBorderRadius(
                             cornerRadius: 10 - 2, cornerSmoothing: 1),
                       ),
-                      color: whitePure(context),
+                      color: Colors.white.withValues(alpha: .15),
                     ),
                   ),
                 );
@@ -84,7 +84,7 @@ class CustomTabSwitcher extends StatelessWidget {
                                 color: !isSelected
                                     ? textLightGrey(context)
                                     : (selectedFontColor ??
-                                        textDarkGrey(context)),
+                                        Colors.white),
                                 fontSize: 15),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,

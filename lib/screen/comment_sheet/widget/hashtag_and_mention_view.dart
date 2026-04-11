@@ -57,7 +57,7 @@ class HashTagAndMentionUserView extends StatelessWidget {
             helper.isLoading.value
                 ? Container(
                     decoration: ShapeDecoration(
-                        color: !helper.isLoading.value && items.isEmpty ? null : whitePure(context),
+                        color: !helper.isLoading.value && items.isEmpty ? null : const Color(0xFF0D0D0D),
                         shape: SmoothRectangleBorder(
                             borderRadius:
                                 SmoothBorderRadius(cornerRadius: 10, cornerSmoothing: 1))),

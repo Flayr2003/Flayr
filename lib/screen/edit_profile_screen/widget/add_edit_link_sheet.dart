@@ -39,7 +39,7 @@ class _AddEditLinksSheetState extends State<AddEditLinksSheet> {
   Widget build(BuildContext context) {
     return Container(
       decoration: ShapeDecoration(
-          color: whitePure(context),
+          color: const Color(0xFF0D0D0D),
           shape: const SmoothRectangleBorder(
               borderRadius: SmoothBorderRadius.vertical(
                   top: SmoothRadius(cornerRadius: 40, cornerSmoothing: 1)))),
