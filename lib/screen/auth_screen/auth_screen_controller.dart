@@ -218,6 +218,11 @@ class AuthScreenController extends BaseController {
     }
 
     if (errorText.contains('canceled')) {
+      return _localizedSignInMessage(
+        ar: 'تم إلغاء تسجيل الدخول عبر Google.',
+        en: 'Google Sign-In was cancelled.',
+      );
+    }
 
     return _localizedSignInMessage(
       ar: 'فشل تسجيل الدخول عبر Google. حاول مرة أخرى.',
