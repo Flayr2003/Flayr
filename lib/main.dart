@@ -90,7 +90,7 @@ class MyApp extends StatelessWidget {
       translations: Get.find<DynamicTranslations>(),
       locale: Locale(SessionManager.instance.getLang()),
       fallbackLocale: Locale(SessionManager.instance.getFallbackLang()),
-      localizationsDelegates: const [
+      localizationsDelegates: [
         GlobalMaterialLocalizations.delegate,
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,

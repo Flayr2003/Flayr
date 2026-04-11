@@ -131,18 +131,12 @@ class AuthScreenController extends BaseController {
   }
 
   Future<UserCredential?> _googleSignInProcess() async {
-    final GoogleSignIn googleSignIn = GoogleSignIn(
-      serverClientId: _googleWebClientId,
-    );
-    // Use the explicit type and wait for the result
-    final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
-    if (googleUser == null) throw 'Google Sign-In cancelled';
+    final GoogleSignIn googleSignIn = GoogleSignIn.instance;
+    final GoogleSignInAccount googleUser = await googleSignIn.authenticate();
 
-    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
-    
-    // In some versions, it might be access_token or just idToken is enough for Firebase
+    final GoogleSignInAuthentication googleAuth = googleUser.authentication;
+
     final AuthCredential credential = GoogleAuthProvider.credential(
-      accessToken: googleAuth.accessToken,
       idToken: googleAuth.idToken,
     );
 
@@ -178,8 +172,8 @@ class AuthScreenController extends BaseController {
   Future<UserCredential?> signInWithApple() async {
     final appleCredential = await SignInWithApple.getAppleIDCredential(
       scopes: [
-        AppleIDAuthorizationScope.email,
-        AppleIDAuthorizationScope.fullName,
+        AppleIDAuthorizationScopes.email,
+        AppleIDAuthorizationScopes.fullName,
       ],
     );
 
