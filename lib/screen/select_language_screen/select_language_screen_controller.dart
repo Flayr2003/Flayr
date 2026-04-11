@@ -48,8 +48,32 @@ class SelectLanguageScreenController extends BaseController {
 
   void initLanguage() {
     final items = SessionManager.instance.getSettings()?.languages ?? [];
-    final activeLanguages = items.where((element) => element.status == 1).toList()
-      ..sort((a, b) => (a.title ?? '').compareTo(b.title ?? ''));
+    final activeLanguages = items.where((element) => element.status == 1).toList();
+
+    final hasEn = activeLanguages.any((element) => element.code == 'en');
+    final hasAr = activeLanguages.any((element) => element.code == 'ar');
+
+    if (!hasEn) {
+      activeLanguages.add(Language(
+        code: 'en',
+        title: 'English',
+        localizedTitle: 'English',
+        status: 1,
+        isDefault: 1,
+      ));
+    }
+
+    if (!hasAr) {
+      activeLanguages.add(Language(
+        code: 'ar',
+        title: 'Arabic',
+        localizedTitle: 'العربية',
+        status: 1,
+        isDefault: 0,
+      ));
+    }
+
+    activeLanguages.sort((a, b) => (a.code ?? '').compareTo(b.code ?? ''));
 
     languages.assignAll(activeLanguages);
 

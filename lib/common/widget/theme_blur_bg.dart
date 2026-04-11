@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flayr/utilities/color_res.dart';
 
 class ThemeBlurBg extends StatelessWidget {
   const ThemeBlurBg({super.key});
@@ -9,20 +8,18 @@ class ThemeBlurBg extends StatelessWidget {
     return Container(
       height: double.infinity,
       width: double.infinity,
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          colors: [
-            Color(0xFF111216),
-            Color(0xFF1A1D24),
-            Color(0xFF0B0C10),
-          ],
-        ),
-      ),
+      color: const Color(0xFF000000),
       child: Container(
-        decoration: BoxDecoration(
-          color: ColorRes.blackPure.withValues(alpha: .18),
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Color(0xFF000000),
+              Color(0xFF101010),
+              Color(0xFF000000),
+            ],
+          ),
         ),
       ),
     );

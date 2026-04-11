@@ -35,81 +35,86 @@ class SelectLanguageScreen extends StatelessWidget {
               children: [
                 _buildHeader(context),
                 Expanded(
-                  child: Container(
-                    margin: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 12),
-                    padding: const EdgeInsets.symmetric(vertical: 8),
-                    decoration: ShapeDecoration(
-                      color: whitePure(context),
-                      shape: SmoothRectangleBorder(
-                        borderRadius:
-                            SmoothBorderRadius(cornerRadius: 20, cornerSmoothing: 1),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 12),
+                    child: Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      decoration: ShapeDecoration(
+                        color: const Color(0xFF121212),
+                        shape: SmoothRectangleBorder(
+                          borderRadius:
+                              SmoothBorderRadius(cornerRadius: 20, cornerSmoothing: 1),
+                        ),
                       ),
-                    ),
-                    child: Obx(
-                      () => ListView.separated(
-                        itemCount: controller.languages.length,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 8),
-                        separatorBuilder: (_, __) => const SizedBox(height: 10),
-                        itemBuilder: (context, index) {
-                          final language = controller.languages[index];
-                          final isSelected =
-                              language == controller.selectedLanguage.value;
+                      child: Obx(
+                        () => ListView.separated(
+                          itemCount: controller.languages.length,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 8),
+                          separatorBuilder: (_, __) => const SizedBox(height: 10),
+                          itemBuilder: (context, index) {
+                            final language = controller.languages[index];
+                            final isSelected =
+                                language == controller.selectedLanguage.value;
 
-                          return Material(
-                            color: isSelected
-                                ? themeAccentSolid(context).withValues(alpha: .12)
-                                : scaffoldBackgroundColor(context),
-                            borderRadius: BorderRadius.circular(14),
-                            child: InkWell(
+                            return Material(
+                              color: isSelected
+                                  ? const Color(0xFF000000)
+                                  : const Color(0xFF1B1B1B),
                               borderRadius: BorderRadius.circular(14),
-                              onTap: () => controller.onLanguageChange(language),
-                              child: Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 14, vertical: 12),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: Column(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          Text(
-                                            language.localizedTitle ?? '',
-                                            style:
-                                                TextStyleCustom.outFitMedium500(
-                                              fontSize: 15,
-                                              color: textDarkGrey(context),
-                                            ),
-                                          ),
-                                          const SizedBox(height: 2),
-                                          Text(
-                                            language.title ?? '',
-                                            style:
-                                                TextStyleCustom.outFitRegular400(
-                                              fontSize: 13,
-                                              color: textLightGrey(context),
-                                            ),
-                                          ),
-                                        ],
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(14),
+                                onTap: () => controller.onLanguageChange(language),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 14, vertical: 12),
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        isSelected
+                                            ? Icons.radio_button_checked
+                                            : Icons.radio_button_unchecked,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.white70,
+                                        size: 22,
                                       ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Icon(
-                                      isSelected
-                                          ? Icons.check_circle
-                                          : Icons.radio_button_unchecked,
-                                      color: isSelected
-                                          ? themeAccentSolid(context)
-                                          : textLightGrey(context),
-                                      size: 22,
-                                    )
-                                  ],
+                                      const SizedBox(width: 12),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              language.localizedTitle ?? '',
+                                              style:
+                                                  TextStyleCustom.outFitMedium500(
+                                                fontSize: 15,
+                                                color: Colors.white,
+                                              ),
+                                            ),
+                                            const SizedBox(height: 2),
+                                            Text(
+                                              language.title ?? '',
+                                              style:
+                                                  TextStyleCustom.outFitRegular400(
+                                                fontSize: 13,
+                                                color: Colors.white70,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          );
-                        },
+                            );
+                          },
+                        ),
                       ),
                     ),
                   ),
