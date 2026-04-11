@@ -8,7 +8,7 @@ class ThemeRes {
       useMaterial3: true,
       scaffoldBackgroundColor: ColorRes.whitePure,
       navigationBarTheme: const NavigationBarThemeData(
-        backgroundColor: ColorRes.blackPure,
+        backgroundColor: ColorRes.whitePure,
       ),
       appBarTheme: const AppBarTheme(backgroundColor: ColorRes.bgLightGrey),
       fontFamily: FontRes.outFitRegular400,
@@ -36,7 +36,7 @@ class ThemeRes {
       dividerColor: ColorRes.bgGrey,
       cardColor: ColorRes.bgMediumGrey,
       primaryColorDark: ColorRes.blackPure,
-      canvasColor: ColorRes.themeColor,
+      canvasColor: ColorRes.whitePure,
     );
   }
 

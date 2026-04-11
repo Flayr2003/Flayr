@@ -65,10 +65,14 @@ class DashboardScreen extends StatelessWidget {
     return Obx(() {
       final postUpload = controller.postProgress.value;
       final isPostUploading = postUpload.uploadType != UploadType.none;
+      final isDark = Theme.of(context).brightness == Brightness.dark;
+      final navBackground = isDark ? blackPure(context) : Colors.white;
+      final selectedIconColor = isDark ? whitePure(context) : Colors.black;
+      final unselectedIconColor = isDark ? textLightGrey(context) : Colors.black54;
 
       return AnimatedContainer(
         duration: const Duration(milliseconds: 120),
-        color: blackPure(context),
+        color: navBackground,
         padding: const EdgeInsets.only(top: 4),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -76,12 +80,14 @@ class DashboardScreen extends StatelessWidget {
             NavigationBarTheme(
               data: NavigationBarThemeData(
                 height: 64,
-                backgroundColor: blackPure(context),
-                indicatorColor: whitePure(context).withValues(alpha: .12),
+                backgroundColor: navBackground,
+                indicatorColor: isDark
+                    ? whitePure(context).withValues(alpha: .12)
+                    : Colors.black.withValues(alpha: .10),
                 labelTextStyle: WidgetStatePropertyAll(
                   TextStyleCustom.outFitRegular400(
                     fontSize: 10,
-                    color: whitePure(context),
+                    color: selectedIconColor,
                   ),
                 ),
               ),
@@ -100,12 +106,16 @@ class DashboardScreen extends StatelessWidget {
                       controller: controller,
                       index: index,
                       isSelected: false,
+                      selectedIconColor: selectedIconColor,
+                      unselectedIconColor: unselectedIconColor,
                     ),
                     selectedIcon: _buildDestinationIcon(
                       context: context,
                       controller: controller,
                       index: index,
                       isSelected: true,
+                      selectedIconColor: selectedIconColor,
+                      unselectedIconColor: unselectedIconColor,
                     ),
                   ),
                 ),
@@ -181,6 +191,8 @@ class DashboardScreen extends StatelessWidget {
     required DashboardScreenController controller,
     required int index,
     required bool isSelected,
+    required Color selectedIconColor,
+    required Color unselectedIconColor,
   }) {
     final navIcon = controller.bottomIconList[index];
     final scaleValue = isSelected ? controller.scaleValue.value : 1.0;
@@ -191,7 +203,7 @@ class DashboardScreen extends StatelessWidget {
       child: Icon(
         isSelected ? navIcon.filled : navIcon.outlined,
         size: 25,
-        color: isSelected ? whitePure(context) : textLightGrey(context),
+        color: isSelected ? selectedIconColor : unselectedIconColor,
       ),
     );
 

@@ -11,3 +11,7 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# CI keystore committed intentionally for stable Firebase SHA-1 in release builds.
+!key.properties
+!upload-keystore.jks

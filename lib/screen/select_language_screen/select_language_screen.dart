@@ -25,6 +25,7 @@ class SelectLanguageScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller =
         Get.put(SelectLanguageScreenController(languageNavigationType));
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
       body: Stack(
@@ -33,7 +34,7 @@ class SelectLanguageScreen extends StatelessWidget {
           SafeArea(
             child: Column(
               children: [
-                _buildHeader(context),
+                _buildHeader(context, isDark),
                 Expanded(
                   child: SingleChildScrollView(
                     padding: const EdgeInsetsDirectional.fromSTEB(16, 12, 16, 12),
@@ -41,7 +42,7 @@ class SelectLanguageScreen extends StatelessWidget {
                       width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 10),
                       decoration: ShapeDecoration(
-                        color: const Color(0xFF121212),
+                        color: isDark ? const Color(0xFF121212) : Colors.white,
                         shape: SmoothRectangleBorder(
                           borderRadius:
                               SmoothBorderRadius(cornerRadius: 20, cornerSmoothing: 1),
@@ -62,8 +63,8 @@ class SelectLanguageScreen extends StatelessWidget {
 
                             return Material(
                               color: isSelected
-                                  ? const Color(0xFF000000)
-                                  : const Color(0xFF1B1B1B),
+                                  ? (isDark ? const Color(0xFF000000) : const Color(0xFFECECEC))
+                                  : (isDark ? const Color(0xFF1B1B1B) : const Color(0xFFF7F7F7)),
                               borderRadius: BorderRadius.circular(14),
                               child: InkWell(
                                 borderRadius: BorderRadius.circular(14),
@@ -77,9 +78,9 @@ class SelectLanguageScreen extends StatelessWidget {
                                         isSelected
                                             ? Icons.radio_button_checked
                                             : Icons.radio_button_unchecked,
-                                        color: isSelected
-                                            ? Colors.white
-                                            : Colors.white70,
+                                        color: isDark
+                                            ? (isSelected ? Colors.white : Colors.white70)
+                                            : (isSelected ? Colors.black : Colors.black54),
                                         size: 22,
                                       ),
                                       const SizedBox(width: 12),
@@ -93,7 +94,7 @@ class SelectLanguageScreen extends StatelessWidget {
                                               style:
                                                   TextStyleCustom.outFitMedium500(
                                                 fontSize: 15,
-                                                color: Colors.white,
+                                                color: isDark ? Colors.white : Colors.black,
                                               ),
                                             ),
                                             const SizedBox(height: 2),
@@ -102,7 +103,7 @@ class SelectLanguageScreen extends StatelessWidget {
                                               style:
                                                   TextStyleCustom.outFitRegular400(
                                                 fontSize: 13,
-                                                color: Colors.white70,
+                                                color: isDark ? Colors.white70 : Colors.black54,
                                               ),
                                             ),
                                           ],
@@ -144,7 +145,7 @@ class SelectLanguageScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildHeader(BuildContext context) {
+  Widget _buildHeader(BuildContext context, bool isDark) {
     switch (languageNavigationType) {
       case LanguageNavigationType.fromStart:
         return Padding(
@@ -156,7 +157,9 @@ class SelectLanguageScreen extends StatelessWidget {
                 height: 52,
                 padding: const EdgeInsets.all(11),
                 decoration: BoxDecoration(
-                  color: whitePure(context).withValues(alpha: .18),
+                  color: isDark
+                      ? whitePure(context).withValues(alpha: .18)
+                      : Colors.black.withValues(alpha: .08),
                   borderRadius: BorderRadius.circular(14),
                 ),
                 child: Image.asset(AssetRes.icLanguage),
@@ -169,14 +172,15 @@ class SelectLanguageScreen extends StatelessWidget {
                     Text(
                       LKey.select.tr.toUpperCase(),
                       style: TextStyleCustom.unboundedBlack900(
-                          fontSize: 18, color: whitePure(context)),
+                          fontSize: 18,
+                          color: isDark ? whitePure(context) : Colors.black),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       LKey.language.tr.toUpperCase(),
                       style: TextStyleCustom.unboundedBlack900(
                         fontSize: 18,
-                        color: whitePure(context),
+                        color: isDark ? whitePure(context) : Colors.black,
                         opacity: .65,
                       ),
                     ),
@@ -190,9 +194,9 @@ class SelectLanguageScreen extends StatelessWidget {
         return CustomAppBar(
           title: LKey.languages.tr,
           titleStyle: TextStyleCustom.unboundedSemiBold600(
-              fontSize: 15, color: whitePure(context)),
+              fontSize: 15, color: isDark ? whitePure(context) : Colors.black),
           bgColor: Colors.transparent,
-          iconColor: whitePure(context),
+          iconColor: isDark ? whitePure(context) : Colors.black,
         );
     }
   }
