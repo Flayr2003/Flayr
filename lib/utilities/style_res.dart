@@ -7,7 +7,7 @@ import 'package:flayr/utilities/theme_res.dart';
 
 class StyleRes {
   static Gradient themeGradient = const LinearGradient(
-    colors: [ColorRes.blackPure, Color(0xFF1A1A1A)],
+    colors: [Color(0xFF3E8BFF), Color(0xFF7B5CFF)],
     begin: Alignment.centerLeft,
     end: Alignment.centerRight,
   );
@@ -42,6 +42,6 @@ class StyleRes {
   static Shader wavesGradient = ui.Gradient.linear(
     const Offset(70, 50),
     Offset(Get.width / 2, 0),
-    [ColorRes.blackPure, const Color(0xFF1A1A1A)],
+    [const Color(0xFF3E8BFF), const Color(0xFF7B5CFF)],
   );
 }

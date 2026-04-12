@@ -21,11 +21,11 @@ class SplashScreen extends StatelessWidget {
             alignment: Alignment.center,
             child: CustomShimmerFillText(
               text: AppRes.appName.toUpperCase(),
-              baseColor: whitePure(context),
+              baseColor: Colors.white,
               textStyle: TextStyleCustom.unboundedBlack900(
-                  color: whitePure(context), fontSize: 30),
-              finalColor: whitePure(context),
-              shimmerColor: themeAccentSolid(context),
+                  color: Colors.white, fontSize: 30),
+              finalColor: Colors.white,
+              shimmerColor: const Color(0xFF3E8BFF),
             ),
           )
         ],
