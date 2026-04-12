@@ -4,6 +4,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:readmore/readmore.dart';
+import 'package:video_player/video_player.dart';
+import 'package:visibility_detector/visibility_detector.dart';
 import 'package:flayr/common/extensions/string_extension.dart';
 import 'package:flayr/common/service/navigation/navigate_with_controller.dart';
 import 'package:flayr/common/service/url_extractor/parsers/base_parser.dart';
@@ -280,7 +282,7 @@ class PostImageView extends StatelessWidget {
   }
 }
 
-class PostVideoView extends StatelessWidget {
+class PostVideoView extends StatefulWidget {
   final Post? post;
   final EdgeInsets? margin;
   final double? radius;
@@ -298,48 +300,140 @@ class PostVideoView extends StatelessWidget {
       this.isFromChat = false});
 
   @override
+  State<PostVideoView> createState() => _PostVideoViewState();
+}
+
+class _PostVideoViewState extends State<PostVideoView> {
+  VideoPlayerController? _controller;
+  bool _isInitialized = false;
+  bool _isMuted = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _initVideoPlayer();
+  }
+
+  void _initVideoPlayer() {
+    final videoUrl = widget.post?.video?.addBaseURL();
+    if (videoUrl != null && videoUrl.isNotEmpty) {
+      _controller = VideoPlayerController.networkUrl(Uri.parse(videoUrl))
+        ..setLooping(true)
+        ..setVolume(0) // Start muted
+        ..initialize().then((_) {
+          if (mounted) {
+            setState(() {
+              _isInitialized = true;
+            });
+          }
+        });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return DoubleTapDetector(
-      onDoubleTap: (details) {
-        if (onDoubleTap != null) {
-          onDoubleTap?.call(details);
+    return VisibilityDetector(
+      key: Key('post-video-${widget.post?.id ?? widget.post?.video}'),
+      onVisibilityChanged: (info) {
+        if (!mounted || _controller == null || !_isInitialized) return;
+        if (info.visibleFraction > 0.5) {
+          _controller?.play();
+        } else {
+          _controller?.pause();
         }
       },
-      onTap: isFromChat
-          ? null
-          : () {
-              Get.to(() => ReelsScreen(reels: [post!].obs, position: 0));
-            },
-      child: Container(
-        margin: margin ?? const EdgeInsets.only(right: 10.0, top: 10),
-        constraints: BoxConstraints(
-            maxHeight: 211,
-            minHeight: 211,
-            maxWidth: MediaQuery.of(context).size.width,
-            minWidth: MediaQuery.of(context).size.width),
-        child: ClipSmoothRect(
-          radius: SmoothBorderRadius(
-              cornerRadius: radius ?? 10, cornerSmoothing: 1),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              CustomImage(
-                size: const Size(double.infinity, 211),
-                fit: BoxFit.cover,
-                radius: radius ?? 10,
-                cornerSmoothing: 1,
-                image: post?.thumbnail?.addBaseURL(),
-              ),
-              Container(
-                height: 35,
-                width: 35,
-                decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: textDarkGrey(context).withValues(alpha: .4)),
-                alignment: Alignment.center,
-                child: Image.asset(AssetRes.icPlay, width: 20, height: 20),
-              )
-            ],
+      child: DoubleTapDetector(
+        onDoubleTap: (details) {
+          if (widget.onDoubleTap != null) {
+            widget.onDoubleTap?.call(details);
+          }
+        },
+        onTap: widget.isFromChat
+            ? null
+            : () {
+                _controller?.pause();
+                Get.to(() => ReelsScreen(reels: [widget.post!].obs, position: 0));
+              },
+        child: Container(
+          margin: widget.margin ?? const EdgeInsets.only(right: 10.0, top: 10),
+          constraints: BoxConstraints(
+              maxHeight: 211,
+              minHeight: 211,
+              maxWidth: MediaQuery.of(context).size.width,
+              minWidth: MediaQuery.of(context).size.width),
+          child: ClipSmoothRect(
+            radius: SmoothBorderRadius(
+                cornerRadius: widget.radius ?? 10, cornerSmoothing: 1),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                // Video player or thumbnail fallback
+                if (_isInitialized && _controller != null)
+                  SizedBox.expand(
+                    child: FittedBox(
+                      fit: BoxFit.cover,
+                      child: SizedBox(
+                        width: _controller!.value.size.width,
+                        height: _controller!.value.size.height,
+                        child: VideoPlayer(_controller!),
+                      ),
+                    ),
+                  )
+                else
+                  CustomImage(
+                    size: const Size(double.infinity, 211),
+                    fit: BoxFit.cover,
+                    radius: widget.radius ?? 10,
+                    cornerSmoothing: 1,
+                    image: widget.post?.thumbnail?.addBaseURL(),
+                  ),
+                // Mute/unmute button
+                if (_isInitialized)
+                  Positioned(
+                    bottom: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _isMuted = !_isMuted;
+                          _controller?.setVolume(_isMuted ? 0 : 1);
+                        });
+                      },
+                      child: Container(
+                        height: 30,
+                        width: 30,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.black.withValues(alpha: 0.5),
+                        ),
+                        alignment: Alignment.center,
+                        child: Icon(
+                          _isMuted ? Icons.volume_off : Icons.volume_up,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  ),
+                // Play indicator (only when not initialized)
+                if (!_isInitialized)
+                  Container(
+                    height: 35,
+                    width: 35,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: textDarkGrey(context).withValues(alpha: .4)),
+                    alignment: Alignment.center,
+                    child: Image.asset(AssetRes.icPlay, width: 20, height: 20),
+                  )
+              ],
+            ),
           ),
         ),
       ),
