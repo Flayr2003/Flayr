@@ -132,28 +132,20 @@ class GiftManager {
   }
 
   static void showAnimationDialog(Gift gift) {
+    HapticManager.shared.light();
     showGeneralDialog(
       context: Get.context!,
+      barrierDismissible: true,
+      barrierLabel: '',
+      barrierColor: Colors.black.withValues(alpha: 0.3),
       pageBuilder: (context, animation, secondaryAnimation) {
         return SendGiftDialog(gift: gift);
       },
-      transitionDuration: const Duration(milliseconds: 400),
+      transitionDuration: const Duration(milliseconds: 100),
       transitionBuilder: (context, animation, secondaryAnimation, child) {
-        final slideAnimation = Tween<Offset>(
-          begin: const Offset(0, 1),
-          end: Offset.zero,
-        ).animate(animation);
-
-        if (slideAnimation.isForwardOrCompleted) {
-          HapticManager.shared.light();
-        }
-
-        return SlideTransition(
-          position: slideAnimation,
-          child: FadeTransition(
-            opacity: animation,
-            child: child,
-          ),
+        return FadeTransition(
+          opacity: animation,
+          child: child,
         );
       },
     );
