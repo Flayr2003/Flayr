@@ -163,14 +163,17 @@ class _ReelPageState extends State<ReelPage> {
       child: Stack(
         alignment: Alignment.bottomCenter,
         children: [
-          /// 🎬 Directly play video (no thumbnail, no loader)
-          if (_controller != null) buildContent(),
+          /// 🎬 Video content or loading indicator
+          if (_controller != null && _initialized)
+            buildContent()
+          else
+            _buildLoadingPlaceholder(context),
 
           /// 🕹 Tap Overlay (pause/play)
           InkWell(onTap: onPlayPause, child: const BlackGradientShadow()),
 
           /// ▶ Play/Pause Icon overlay
-          if (_controller != null)
+          if (_controller != null && _initialized)
             AnimatedOpacity(
               duration: const Duration(milliseconds: 150),
               opacity: isPlaying ? 0.0 : 1.0,
@@ -212,6 +215,41 @@ class _ReelPageState extends State<ReelPage> {
               onCompleteAnimation: () => details.value = null,
             );
           }),
+        ],
+      ),
+    );
+  }
+
+  /// Loading placeholder with thumbnail and spinner
+  Widget _buildLoadingPlaceholder(BuildContext context) {
+    final thumbnailUrl = widget.reelData.thumbnail?.addBaseURL();
+    return SizedBox.expand(
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Show thumbnail if available
+          if (thumbnailUrl != null && thumbnailUrl.isNotEmpty)
+            Image.network(
+              thumbnailUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (_, __, ___) => Container(color: Colors.black),
+            )
+          else
+            Container(color: Colors.black),
+          // Loading spinner overlay
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.5),
+                shape: BoxShape.circle,
+              ),
+              child: const CircularProgressIndicator(
+                strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white70),
+              ),
+            ),
+          ),
         ],
       ),
     );

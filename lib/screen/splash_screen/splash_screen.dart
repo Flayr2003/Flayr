@@ -21,16 +21,29 @@ class SplashScreen extends StatelessWidget {
             width: double.infinity,
             color: const Color(0xFF000000),
           ),
-          // App name centered with shimmer
+          // Big logo centered
           Align(
             alignment: Alignment.center,
-            child: CustomShimmerFillText(
-              text: AppRes.appName.toUpperCase(),
-              baseColor: Colors.white,
-              textStyle: TextStyleCustom.unboundedBlack900(
-                  color: Colors.white, fontSize: 30),
-              finalColor: Colors.white,
-              shimmerColor: const Color(0xFF3E8BFF),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // App icon - bigger, no white background
+                Image.asset(
+                  'assets/icons/app_icon.png',
+                  width: 160,
+                  height: 160,
+                ),
+                const SizedBox(height: 24),
+                // App name with shimmer
+                CustomShimmerFillText(
+                  text: AppRes.appName.toUpperCase(),
+                  baseColor: Colors.white,
+                  textStyle: TextStyleCustom.unboundedBlack900(
+                      color: Colors.white, fontSize: 38),
+                  finalColor: Colors.white,
+                  shimmerColor: const Color(0xFF3E8BFF),
+                ),
+              ],
             ),
           ),
           // Developer credit at the bottom

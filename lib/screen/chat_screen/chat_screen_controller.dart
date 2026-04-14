@@ -419,7 +419,9 @@ class ChatScreenController extends BlockUserController
         if (message == null) continue;
         switch (change.type) {
           case DocumentChangeType.added:
-            chatList.add(message);
+            if (!chatList.any((m) => m.id == message.id)) {
+              chatList.add(message);
+            }
             break;
           case DocumentChangeType.modified:
             chatList.removeWhere((element) => element.id == message.id);
@@ -436,6 +438,49 @@ class ChatScreenController extends BlockUserController
       if (event.docs.isNotEmpty) {
         lastDocument = event.docs.last;
       }
+    }, onError: (error) {
+      Loggers.error('Chat messages listener error: $error');
+      // Fallback: try without composite index
+      _getChatFallback();
+    });
+    chatListeners.add(subscription);
+  }
+
+  void _getChatFallback() async {
+    var subscription = chatCollection
+        .where(FirebaseConst.noDeleteIds, arrayContains: myUser?.id)
+        .orderBy(FirebaseConst.id, descending: true)
+        .limit(AppRes.chatPaginationLimit)
+        .withConverter(
+            fromFirestore: (snapshot, options) =>
+                MessageData.fromJson(snapshot.data()!),
+            toFirestore: (MessageData value, options) => value.toJson())
+        .snapshots()
+        .listen((event) {
+      for (var change in event.docChanges) {
+        final message = change.doc.data();
+        if (message == null) continue;
+        switch (change.type) {
+          case DocumentChangeType.added:
+            if (!chatList.any((m) => m.id == message.id)) {
+              chatList.add(message);
+            }
+            break;
+          case DocumentChangeType.modified:
+            chatList.removeWhere((element) => element.id == message.id);
+            chatList.add(message);
+            break;
+          case DocumentChangeType.removed:
+            chatList.removeWhere((element) => element.id == message.id);
+            break;
+        }
+      }
+      chatList.sort((a, b) => b.id?.compareTo(a.id ?? 0) ?? 0);
+      if (event.docs.isNotEmpty) {
+        lastDocument = event.docs.last;
+      }
+    }, onError: (error) {
+      Loggers.error('Chat fallback messages listener error: $error');
     });
     chatListeners.add(subscription);
   }

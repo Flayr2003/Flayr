@@ -147,6 +147,8 @@ class DashboardScreenController extends BaseController with GetSingleTickerProvi
 
       unReadCount.value = totalUnread;
       requestUnReadCount.value = requestUnread;
+    }, onError: (error) {
+      Loggers.error('Unread count listener error: $error');
     });
   }
 

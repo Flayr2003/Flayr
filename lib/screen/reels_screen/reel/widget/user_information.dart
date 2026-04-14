@@ -165,10 +165,10 @@ class UserStats extends StatelessWidget {
         children: [
           Text(
             reel.id == -1
-                ? DateFormat('dd MMM yyyy').format(DateTime.now())
+                ? DateFormat('dd MMM, yyyy').format(DateTime.now())
                 : (reel.createdAt ?? '').formatDate,
-            style: TextStyleCustom.outFitLight300(
-                color: whitePure(context), opacity: .8, fontSize: 11),
+            style: TextStyleCustom.outFitRegular400(
+                color: whitePure(context).withValues(alpha: 0.7), fontSize: 12),
           ),
           if (views > 0)
             Row(
@@ -176,15 +176,15 @@ class UserStats extends StatelessWidget {
                 Container(
                   height: 3,
                   width: 3,
-                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  margin: const EdgeInsets.symmetric(horizontal: 5),
                   decoration: BoxDecoration(
-                      color: whitePure(context).withValues(alpha: .8),
+                      color: whitePure(context).withValues(alpha: .6),
                       shape: BoxShape.circle),
                 ),
                 Text(
                   '${reel.views?.numberFormat ?? '0'} ${LKey.views.tr}',
-                  style: TextStyleCustom.outFitLight300(
-                      color: whitePure(context), opacity: .8, fontSize: 11),
+                  style: TextStyleCustom.outFitRegular400(
+                      color: whitePure(context).withValues(alpha: 0.7), fontSize: 12),
                 ),
               ],
             )

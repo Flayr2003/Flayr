@@ -58,9 +58,14 @@ class MessageScreenController extends BaseController {
               firebaseFirestoreController.fetchUserIfNeeded(chatUser.userId ?? -1);
             }
             if (chatUser.chatType == ChatType.approved) {
-              chatsUsers.add(chatUser);
+              // Avoid duplicates
+              if (!chatsUsers.any((u) => u.userId == chatUser.userId)) {
+                chatsUsers.add(chatUser);
+              }
             } else {
-              requestsUsers.add(chatUser);
+              if (!requestsUsers.any((u) => u.userId == chatUser.userId)) {
+                requestsUsers.add(chatUser);
+              }
             }
 
             break;
@@ -93,6 +98,49 @@ class MessageScreenController extends BaseController {
 
       // Loggers.success('CHAT USER: ${chatsUsers.length}');
       // Loggers.success('REQUEST USER: ${requestsUsers.length}');
+    }, onError: (error) {
+      isLoading.value = false;
+      Loggers.error('Chat listener error: $error');
+      // If composite index is missing, try without orderBy as fallback
+      _listenToUserChatsAndRequestsFallback();
+    });
+  }
+
+  /// Fallback listener without orderBy (in case composite index is missing)
+  Future<void> _listenToUserChatsAndRequestsFallback() async {
+    db
+        .collection(FirebaseConst.users)
+        .doc(myUser?.id.toString())
+        .collection(FirebaseConst.usersList)
+        .withConverter(
+            fromFirestore: (snapshot, options) => ChatThread.fromJson(snapshot.data()!),
+            toFirestore: (ChatThread value, options) => value.toJson())
+        .where(FirebaseConst.isDeleted, isEqualTo: false)
+        .snapshots()
+        .listen((event) {
+      isLoading.value = false;
+      chatsUsers.clear();
+      requestsUsers.clear();
+      
+      for (var doc in event.docs) {
+        final ChatThread? chatUser = doc.data();
+        if (chatUser == null) continue;
+
+        if (chatUser.userId != -1) {
+          firebaseFirestoreController.fetchUserIfNeeded(chatUser.userId ?? -1);
+        }
+        if (chatUser.chatType == ChatType.approved) {
+          chatsUsers.add(chatUser);
+        } else {
+          requestsUsers.add(chatUser);
+        }
+      }
+
+      chatsUsers.sort((a, b) => (b.id ?? '0').compareTo(a.id ?? '0'));
+      requestsUsers.sort((a, b) => (b.id ?? '0').compareTo(a.id ?? '0'));
+    }, onError: (error) {
+      isLoading.value = false;
+      Loggers.error('Chat fallback listener error: $error');
     });
   }
 
