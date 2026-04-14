@@ -22,9 +22,9 @@ class OnBoardingScreen extends StatelessWidget {
       body: Stack(
         children: [
           const ThemeBlurBg(),
-          // Image View
-          Obx(() =>
-              OnBoardingTopBGView(index: controller.selectedPage.value, controller: controller)),
+          // Image View Removed as per user request
+          /*Obx(() =>
+              OnBoardingTopBGView(index: controller.selectedPage.value, controller: controller)),*/
           // Text and Description view with button
           Obx(
             () => Column(

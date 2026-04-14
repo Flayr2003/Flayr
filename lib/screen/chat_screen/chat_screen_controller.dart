@@ -616,7 +616,7 @@ class ChatScreenController extends BlockUserController
     sendMessageToFireStore(
       type: isImageMessage ? MessageType.image : MessageType.video,
       imageMessage: isImageMessage ? filePath : thumbnailPath,
-      videoMessage: !isImageMessage ? filePath : thumbnailPath,
+      videoMessage: !isImageMessage ? filePath : '',
       textMessage: mediaTextController.text.trim(),
     );
   }
