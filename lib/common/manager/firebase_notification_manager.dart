@@ -49,32 +49,24 @@ class FirebaseNotificationManager {
       FlutterLocalNotificationsPlugin();
   RxString notificationPayload = ''.obs;
   AndroidNotificationChannel channel = const AndroidNotificationChannel(
-      'flayr_chat', // id
-      'Flayr Messages', // title
-      description: 'Chat messages and notifications',
+      'shortzz', // id
+      'Shortzz', // title
       playSound: true,
       enableLights: true,
       enableVibration: true,
-      showBadge: true,
+      showBadge: false,
       importance: Importance.max);
 
   String? notificationId;
 
   void init() async {
-    // Request permissions
     if (Platform.isAndroid) {
       // Request local notification permission (Android 13+)
       await flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()
           ?.requestNotificationsPermission();
       // Also request FCM permission on Android (required for getToken() to work)
-      NotificationSettings settings = await firebaseMessaging.requestPermission(
-        alert: true,
-        badge: false,
-        sound: true,
-        provisional: false,
-      );
-      Loggers.info('FCM Permission Status: ${settings.authorizationStatus}');
+      await firebaseMessaging.requestPermission(alert: true, badge: false, sound: true);
     } else {
       await flutterLocalNotificationsPlugin
           .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>()
@@ -83,12 +75,6 @@ class FirebaseNotificationManager {
     }
 
     subscribeToTopic();
-
-    // Listen for FCM token refresh
-    firebaseMessaging.onTokenRefresh.listen((newToken) {
-      Loggers.info('FCM Token Refreshed: $newToken');
-      _updateDeviceTokenOnServer(newToken);
-    });
 
     var initializationSettingsAndroid = const AndroidInitializationSettings('@mipmap/ic_launcher');
 
@@ -264,26 +250,11 @@ class FirebaseNotificationManager {
   Future<String?> getNotificationToken() async {
     try {
       String? token = await FirebaseMessaging.instance.getToken();
-      Loggers.info('DeviceToken ${token != null ? "RECEIVED" : "NULL"}');
-      if (token != null) {
-        _updateDeviceTokenOnServer(token);
-      }
+      Loggers.info('DeviceToken $token');
       return token;
     } catch (e) {
       Loggers.error('DeviceToken Exception $e');
       return null;
-    }
-  }
-
-  Future<void> _updateDeviceTokenOnServer(String token) async {
-    try {
-      final user = SessionManager.instance.getUser();
-      if (user != null && SessionManager.instance.isLogin()) {
-        await UserService.instance.updateUserDetails(deviceToken: token);
-        Loggers.success('FCM Token updated on server');
-      }
-    } catch (e) {
-      Loggers.error('Failed to update FCM token on server: $e');
     }
   }
 

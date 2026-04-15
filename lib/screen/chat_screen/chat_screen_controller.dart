@@ -118,12 +118,7 @@ class ChatScreenController extends BlockUserController
   @override
   void onReady() {
     super.onReady();
-    _initAsync();
-  }
-
-  Future<void> _initAsync() async {
     _init();
-    await _fetchOtherUser();
     _getChat();
     _addUsersFirebaseFireStore();
   }
@@ -152,6 +147,7 @@ class ChatScreenController extends BlockUserController
   _init() {
     _initAudioAnimationController();
     _initializePlayerStateListener();
+    _fetchOtherUser();
   }
 
   _initAudioAnimationController() {
@@ -263,24 +259,13 @@ class ChatScreenController extends BlockUserController
 
     Loggers.success('FIREBASE MESSAGE : ${message.toJson()}');
 
-    // Entry chat list with retry
-    try {
-      await chatCollection
-          .doc(time.toString())
-          .set(message.toJson());
-    } catch (error) {
+    // Entry chat list
+    chatCollection
+        .doc(time.toString())
+        .set(message.toJson())
+        .catchError((error) {
       Loggers.error('Chat Collection ERROR : $error');
-      // Retry once
-      try {
-        await Future.delayed(const Duration(seconds: 1));
-        await chatCollection
-            .doc(time.toString())
-            .set(message.toJson());
-      } catch (retryError) {
-        Loggers.error('Chat Collection RETRY ERROR : $retryError');
-        return;
-      }
-    }
+    });
 
     // For Sender side
     bool isReceiverUserExist = (await documentSender.get()).exists;
@@ -344,10 +329,6 @@ class ChatScreenController extends BlockUserController
   }
 
   void pushNotificationToUser(MessageData message) {
-    if (otherUser == null) {
-      Loggers.warning('Cannot send notification: otherUser is null');
-      return;
-    }
     if (otherUser?.notifyChat == 0) return;
 
     String bodyMessage = '';
@@ -361,7 +342,7 @@ class ChatScreenController extends BlockUserController
       case MessageType.post:
         bodyMessage = 'Shared a Post';
       case MessageType.audio:
-        bodyMessage = 'Sent a voice message';
+        bodyMessage = '🎙️ Sent a voice message';
       case MessageType.text:
         bodyMessage = message.textMessage ?? '';
       case MessageType.gift:
@@ -374,27 +355,13 @@ class ChatScreenController extends BlockUserController
         bodyMessage = '';
     }
 
-    // Build notification data - ensure it's never null
-    Map<String, dynamic> notificationData;
-    if (myConversationUser != null) {
-      notificationData = myConversationUser!.toJson();
-    } else {
-      // Fallback: build the data from available info
-      notificationData = ChatThread(
-        conversationId: conversationUser.value.conversationId,
-        userId: myUser?.id,
-        lastMsg: bodyMessage,
-        chatType: ChatType.approved,
-      ).toJson();
-    }
-
     NotificationService.instance.pushNotification(
         title: myUser?.fullname ?? '',
         body: bodyMessage,
         token: otherUser?.deviceToken,
         deviceType: otherUser?.device,
         type: NotificationType.chat,
-        data: notificationData);
+        data: myConversationUser?.toJson());
   }
 
   String getLastMessage(MessageType type, MessageData message,
