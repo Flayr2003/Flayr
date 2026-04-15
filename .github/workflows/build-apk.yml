@@ -66,8 +66,7 @@ jobs:
         run: |
           echo "### SHA-1 Certificate Fingerprint" >> $GITHUB_STEP_SUMMARY
           echo '```' >> $GITHUB_STEP_SUMMARY
-          keytool -printcert -jarfile build/app/outputs/flutter-apk/app-release.apk | grep "SHA1\|SHA256"
-          keytool -printcert -jarfile build/app/outputs/flutter-apk/app-release.apk | grep "SHA1\|SHA256" >> $GITHUB_STEP_SUMMARY
+          keytool -printcert -jarfile build/app/outputs/flutter-apk/app-release.apk >> $GITHUB_STEP_SUMMARY 2>&1 || true
           echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**APK Size:** ${{ steps.version.outputs.apk_size }}" >> $GITHUB_STEP_SUMMARY
