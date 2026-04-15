@@ -74,7 +74,16 @@ jobs:
       - name: Build Signed Release APK
         run: flutter build apk --release --no-tree-shake-icons
 
-      # ─── 10. Prepare release info ───────────────────────────────────
+      # ─── 10. Extract SHA-1 from APK ─────────────────────────────────
+      - name: Extract SHA-1 from APK
+        run: |
+          echo "### 🔐 SHA-1 Certificate Fingerprint" >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          keytool -printcert -jarfile build/app/outputs/flutter-apk/app-release.apk | grep "SHA1:" >> $GITHUB_STEP_SUMMARY || echo "Could not extract SHA1" >> $GITHUB_STEP_SUMMARY
+          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo "Copy the SHA-1 above and add it to your Firebase Console to fix Google Sign-in." >> $GITHUB_STEP_SUMMARY
+
+      # ─── 11. Prepare release info ───────────────────────────────────
       - name: Prepare release info
         id: version
         run: |
@@ -102,7 +111,7 @@ jobs:
           echo "| **Commit** | $SHORT_SHA |" >> $GITHUB_STEP_SUMMARY
           echo "| **APK Size** | $APK_SIZE |" >> $GITHUB_STEP_SUMMARY
 
-      # ─── 11. Upload APK as Artifact ─────────────────────────────────
+      # ─── 12. Upload APK as Artifact ─────────────────────────────────
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -110,7 +119,7 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 90
 
-      # ─── 12. Create GitHub Release ──────────────────────────────────
+      # ─── 13. Create GitHub Release ──────────────────────────────────
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
