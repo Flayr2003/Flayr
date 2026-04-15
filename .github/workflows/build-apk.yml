@@ -2,7 +2,7 @@ name: Build Android APK
 
 on:
   push:
-    branches: [ master, main ]
+    branches: [ master, main, Flayr ]
   workflow_dispatch:
 
 permissions:
