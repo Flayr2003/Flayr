@@ -5,9 +5,12 @@ on:
     branches: [ master, main ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
-    name: Build Signed Release APK
+    name: Build & Release APK
     runs-on: ubuntu-latest
 
     steps:
@@ -39,27 +42,64 @@ jobs:
       - name: Build Signed Release APK
         run: flutter build apk --release --no-tree-shake-icons
 
+      - name: Get version and prepare release info
+        if: success()
+        id: version
+        run: |
+          VERSION=$(grep 'version:' pubspec.yaml | head -1 | awk '{print $2}')
+          BUILD_NUM=${{ github.run_number }}
+          SHORT_SHA=$(echo ${{ github.sha }} | cut -c1-7)
+          TAG="v${VERSION}-build${BUILD_NUM}"
+          FILENAME="Flayr-${VERSION}-build${BUILD_NUM}.apk"
+          APK_SIZE=$(du -h build/app/outputs/flutter-apk/app-release.apk | cut -f1)
+
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "filename=$FILENAME" >> $GITHUB_OUTPUT
+          echo "apk_size=$APK_SIZE" >> $GITHUB_OUTPUT
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+
+          cp build/app/outputs/flutter-apk/app-release.apk "${FILENAME}"
+
       - name: Extract SHA-1 from APK
         if: success()
         run: |
           echo "### SHA-1 Certificate Fingerprint" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          keytool -printcert -jarfile build/app/outputs/flutter-apk/app-release.apk | grep "SHA1\|SHA256"
+          keytool -printcert -jarfile build/app/outputs/flutter-apk/app-release.apk | grep "SHA1\|SHA256" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
-          keytool -printcert -jarfile build/app/outputs/flutter-apk/app-release.apk | grep -A 2 "SHA1\|SHA256"
-          keytool -printcert -jarfile build/app/outputs/flutter-apk/app-release.apk | grep -A 2 "SHA1\|SHA256" >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+          echo "**APK Size:** ${{ steps.version.outputs.apk_size }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Version:** ${{ steps.version.outputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "**Build:** #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
 
-      - name: APK Info
-        if: success()
-        run: |
-          echo "### APK Build Info" >> $GITHUB_STEP_SUMMARY
-          echo "**Size:** $(du -h build/app/outputs/flutter-apk/app-release.apk | cut -f1)" >> $GITHUB_STEP_SUMMARY
-          echo "**Date:** $(date)" >> $GITHUB_STEP_SUMMARY
-
-      - name: Upload Release APK
+      - name: Upload APK Artifact
         if: success()
         uses: actions/upload-artifact@v4
         with:
           name: flayr-release-apk
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 90
+
+      - name: Create GitHub Release
+        if: success()
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: "Flayr ${{ steps.version.outputs.version }} (Build #${{ github.run_number }})"
+          body: |
+            ## Flayr Release - Build #${{ github.run_number }}
+
+            **Version:** ${{ steps.version.outputs.version }}
+            **Commit:** ${{ steps.version.outputs.short_sha }} - ${{ github.event.head_commit.message }}
+            **APK Size:** ${{ steps.version.outputs.apk_size }}
+            **Date:** ${{ github.event.head_commit.timestamp }}
+
+            ### Download
+            Download **${{ steps.version.outputs.filename }}** below and install on your Android device.
+
+            > Enable "Install from unknown sources" in your phone settings if needed.
+          files: ${{ steps.version.outputs.filename }}
+          draft: false
+          prerelease: false
