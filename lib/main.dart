@@ -20,8 +20,11 @@ import 'package:flayr/common/service/auth/firebase_user_sync_service.dart';
 import 'package:flayr/common/service/subscription/subscription_manager.dart';
 import 'package:flayr/common/widget/restart_widget.dart';
 import 'package:flayr/languages/dynamic_translations.dart';
-import 'package:flayr/screen/splash_screen/splash_screen.dart';
 import 'package:flayr/utilities/theme_res.dart';
+import 'package:flayr/screen/dashboard_screen/dashboard_screen.dart';
+import 'package:flayr/screen/auth_screen/login_screen.dart';
+import 'package:flayr/screen/select_language_screen/select_language_screen.dart';
+import 'package:flayr/screen/on_boarding_screen/on_boarding_screen.dart';
 
 import 'common/service/network_helper/network_helper.dart';
 
@@ -50,7 +53,9 @@ Future<void> main() async {
     await Firebase.initializeApp();
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    await FirebaseNotificationManager.instance.init();
+    
+    // Initialize notification manager without blocking the whole app if it fails
+    FirebaseNotificationManager.instance.init().catchError((e) => Loggers.error("FCM Init Error: $e"));
 
     await GetStorage.init('shortzz');
 
@@ -58,7 +63,11 @@ Future<void> main() async {
       FirebaseUserSyncService.syncCurrentSessionUserFromFirebase();
     });
 
-    await FirebaseUserSyncService.syncCurrentSessionUserFromFirebase();
+    // Sync user but don't let it block app startup indefinitely
+    FirebaseUserSyncService.syncCurrentSessionUserFromFirebase().timeout(
+      const Duration(seconds: 5),
+      onTimeout: () => Loggers.warning("User sync timed out"),
+    );
 
     try {
       await SubscriptionManager.shared.initPlatformState();
@@ -89,11 +98,32 @@ Future<void> main() async {
     runApp(const RestartWidget(child: MyApp()));
   } catch (e, st) {
     Loggers.error('Fatal crash during app startup $st');
+    // Still try to run the app even if some init fails
+    runApp(const RestartWidget(child: MyApp()));
   }
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+
+  Widget _getInitialRoute() {
+    final session = SessionManager.instance;
+    
+    if (session.isLogin()) {
+      return DashboardScreen(myUser: session.getUser());
+    } else {
+      bool isLanguageSelect = session.getBool(SessionKeys.isLanguageScreenSelect);
+      bool onBoardingShow = session.getBool(SessionKeys.isOnBoardingScreenSelect);
+      
+      if (!isLanguageSelect) {
+        return const SelectLanguageScreen(languageNavigationType: LanguageNavigationType.fromStart);
+      } else if (!onBoardingShow) {
+        return const OnBoardingScreen();
+      } else {
+        return const LoginScreen();
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,7 +148,7 @@ class MyApp extends StatelessWidget {
       darkTheme: ThemeRes.darkTheme(context),
       theme: ThemeRes.darkTheme(context),
       debugShowCheckedModeBanner: false,
-      home: const SplashScreen(),
+      home: _getInitialRoute(),
     );
   }
 }

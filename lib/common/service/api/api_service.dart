@@ -64,8 +64,9 @@ class ApiService {
     Loggers.info("header: $header");
     Loggers.info("Parameters: ${params.isEmpty ? "Empty" : params}");
     try {
-      final response =
-          await client.post(Uri.parse(url), headers: header, body: params);
+      final response = await client
+          .post(Uri.parse(url), headers: header, body: params)
+          .timeout(const Duration(seconds: 15));
       Loggers.success(response.statusCode);
       if (cancelToken?.isCancelled ?? false) {
         if (kDebugMode) {
@@ -163,7 +164,7 @@ class ApiService {
   }
 
   Future<T> callGet<T>({required String url}) async {
-    http.Response response = await http.get(Uri.parse(url));
+    http.Response response = await http.get(Uri.parse(url)).timeout(const Duration(seconds: 15));
     return jsonDecode(response.body);
   }
 
@@ -216,7 +217,7 @@ class ApiService {
     Loggers.info("FILES : ${request.files.map((e) => e)}");
 
     try {
-      final responseStream = await client.send(request);
+      final responseStream = await client.send(request).timeout(const Duration(seconds: 60));
 
       if (cancelToken?.isCancelled ?? false) {
         if (kDebugMode) {
