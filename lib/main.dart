@@ -26,10 +26,26 @@ import 'package:flayr/screen/splash_screen/splash_screen.dart';
 
 import 'common/service/network_helper/network_helper.dart';
 
+/// Helper: run a future with a timeout. If it fails or times out, log and continue.
+/// This prevents ANY initialization step from hanging the app forever.
+Future<void> _safeRun(String name, Future<void> Function() fn,
+    {Duration timeout = const Duration(seconds: 8)}) async {
+  try {
+    await fn().timeout(timeout, onTimeout: () {
+      Loggers.warning('$name timed out after ${timeout.inSeconds}s - continuing anyway');
+      return;
+    });
+  } catch (e, st) {
+    Loggers.error('$name failed: $e\n$st');
+  }
+}
+
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   Loggers.success("Handling a background message: ${message.data}");
-  await Firebase.initializeApp();
+  try {
+    await Firebase.initializeApp().timeout(const Duration(seconds: 10));
+  } catch (_) {}
   if (Platform.isIOS) {
     FirebaseNotificationManager.instance.showNotification(message);
   }
@@ -75,63 +91,89 @@ Future<void> main() async {
     systemNavigationBarIconBrightness: Brightness.light,
   ));
 
-  try {
-    _registerAppDependencies();
+  // Register core dependencies first (fast, non-blocking)
+  _registerAppDependencies();
 
-    await Firebase.initializeApp();
-
-    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
-    
-    // Initialize notification manager without blocking the whole app if it fails
-    FirebaseNotificationManager.instance.init().catchError((e) => Loggers.error("FCM Init Error: $e"));
-
+  // GetStorage MUST succeed for SessionManager - give it a reasonable timeout
+  await _safeRun('GetStorage.init', () async {
     await GetStorage.init('shortzz');
+  }, timeout: const Duration(seconds: 8));
 
+  // Firebase is critical but should never hang indefinitely
+  await _safeRun('Firebase.initializeApp', () async {
+    await Firebase.initializeApp();
+  }, timeout: const Duration(seconds: 10));
+
+  // FCM background handler registration is synchronous
+  try {
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  } catch (e) {
+    Loggers.error('FCM bg handler register failed: $e');
+  }
+
+  // Fire-and-forget: notifications init (never awaited, never blocks)
+  FirebaseNotificationManager.instance
+      .init()
+      .catchError((e) => Loggers.error("FCM Init Error: $e"));
+
+  // Fire-and-forget: auth state listener
+  try {
     FirebaseAuth.instance.authStateChanges().listen((_) {
       FirebaseUserSyncService.syncCurrentSessionUserFromFirebase();
     });
-
-    // Sync user but don't let it block app startup indefinitely
-    FirebaseUserSyncService.syncCurrentSessionUserFromFirebase().timeout(
-      const Duration(seconds: 5),
-      onTimeout: () {
-        Loggers.warning("User sync timed out");
-        return null;
-      },
-    );
-
-    try {
-      await SubscriptionManager.shared.initPlatformState();
-    } catch (e, st) {
-      Loggers.error('SubscriptionManager init error: $e\n$st');
-    }
-
-    (await AudioSession.instance)
-        .configure(const AudioSessionConfiguration.speech());
-
-    MobileAds.instance.initialize();
-
-    try {
-      await GoogleSignIn.instance.initialize(
-        serverClientId:
-            '28441059803-78ro06cusr82bc0d9ksf3eoo12rvhat1.apps.googleusercontent.com',
-      );
-      Loggers.info('GoogleSignIn initialized at startup');
-    } catch (e) {
-      Loggers.error('GoogleSignIn init error: $e');
-    }
-
-    NetworkHelper().initialize();
-
-    _registerAppDependencies();
-
-    runApp(const RestartWidget(child: MyApp()));
-  } catch (e, st) {
-    Loggers.error('Fatal crash during app startup $st');
-    _registerAppDependencies();
-    // Still try to run the app even if some init fails
-    runApp(const RestartWidget(child: MyApp()));
+  } catch (e) {
+    Loggers.error('authStateChanges listen failed: $e');
   }
+
+  // Fire-and-forget with timeout: user sync
+  FirebaseUserSyncService.syncCurrentSessionUserFromFirebase()
+      .timeout(const Duration(seconds: 5), onTimeout: () {
+    Loggers.warning("User sync timed out");
+    return null;
+  }).catchError((e) {
+    Loggers.error('User sync error: $e');
+    return null;
+  });
+
+  // RevenueCat / Subscription - bounded by timeout to prevent hang
+  await _safeRun('SubscriptionManager.initPlatformState', () async {
+    await SubscriptionManager.shared.initPlatformState();
+  }, timeout: const Duration(seconds: 8));
+
+  // Audio session - bounded by timeout
+  await _safeRun('AudioSession.configure', () async {
+    final session = await AudioSession.instance;
+    await session.configure(const AudioSessionConfiguration.speech());
+  }, timeout: const Duration(seconds: 5));
+
+  // Google Mobile Ads - fire and forget (already non-blocking)
+  try {
+    MobileAds.instance.initialize();
+  } catch (e) {
+    Loggers.error('MobileAds init failed: $e');
+  }
+
+  // Google Sign-In init - bounded by timeout
+  await _safeRun('GoogleSignIn.initialize', () async {
+    await GoogleSignIn.instance.initialize(
+      serverClientId:
+          '28441059803-78ro06cusr82bc0d9ksf3eoo12rvhat1.apps.googleusercontent.com',
+    );
+    Loggers.info('GoogleSignIn initialized at startup');
+  }, timeout: const Duration(seconds: 8));
+
+  // Network helper (synchronous)
+  try {
+    NetworkHelper().initialize();
+  } catch (e) {
+    Loggers.error('NetworkHelper init failed: $e');
+  }
+
+  // Re-register dependencies (idempotent, safe)
+  _registerAppDependencies();
+
+  // ALWAYS call runApp, even if everything above failed.
+  runApp(const RestartWidget(child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
