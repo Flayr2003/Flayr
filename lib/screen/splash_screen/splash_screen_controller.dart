@@ -30,7 +30,7 @@ class SplashScreenController extends BaseController {
   void onReady() {
     super.onReady();
 
-    Future.wait([fetchSettings()]);
+    fetchSettings();
 
     _subscription = NetworkHelper().onConnectionChange.listen((status) {
       isOnline = status;
@@ -101,29 +101,14 @@ class SplashScreenController extends BaseController {
   }
 
   Future<Map<String, Map<String, String>>> downloadAndParseLanguages(List<Language> languages) async {
-    const int maxConcurrentDownloads = 3; // Limit concurrent downloads
-    final Set<Future<void>> activeDownloads = {}; // Track active downloads
     final languageData = <String, Map<String, String>>{};
 
-    for (var language in languages) {
-      if (language.code != null && language.csvFile != null) {
-        // Start the download and add it to the active set
-        final downloadTask = downloadAndProcessLanguage(language, languageData);
-        activeDownloads.add(downloadTask);
-
-        // Limit concurrency
-        if (activeDownloads.length >= maxConcurrentDownloads) {
-          // Wait for any download to complete
-          await Future.any(activeDownloads);
-
-          // Remove completed tasks from the set
-          activeDownloads.removeWhere((task) => task == Future.any(activeDownloads));
-        }
+    for (final language in languages) {
+      if ((language.code ?? '').isEmpty || (language.csvFile ?? '').isEmpty) {
+        continue;
       }
+      await downloadAndProcessLanguage(language, languageData);
     }
-
-    // Wait for all remaining downloads to complete
-    await Future.wait(activeDownloads);
 
     return languageData;
   }
@@ -150,10 +135,23 @@ class SplashScreenController extends BaseController {
     final rows = const CsvToListConverter().convert(csvContent);
     final map = <String, String>{};
 
-    for (var row in rows) {
-      if (row.length >= 2) {
-        map[row[0].toString()] = row[1].toString();
+    for (final row in rows) {
+      if (row.length < 2) {
+        continue;
       }
+
+      final key = row[0].toString().trim();
+      final value = row[1].toString().trim();
+
+      if (key.isEmpty || value.isEmpty) {
+        continue;
+      }
+
+      if (key.toLowerCase() == 'key' && value.toLowerCase() == 'value') {
+        continue;
+      }
+
+      map[key] = value;
     }
     return map;
   }

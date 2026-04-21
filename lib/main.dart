@@ -20,11 +20,9 @@ import 'package:flayr/common/service/auth/firebase_user_sync_service.dart';
 import 'package:flayr/common/service/subscription/subscription_manager.dart';
 import 'package:flayr/common/widget/restart_widget.dart';
 import 'package:flayr/languages/dynamic_translations.dart';
+import 'package:flayr/languages/local_fallback_translations.dart';
 import 'package:flayr/utilities/theme_res.dart';
-import 'package:flayr/screen/dashboard_screen/dashboard_screen.dart';
-import 'package:flayr/screen/auth_screen/login_screen.dart';
-import 'package:flayr/screen/select_language_screen/select_language_screen.dart';
-import 'package:flayr/screen/on_boarding_screen/on_boarding_screen.dart';
+import 'package:flayr/screen/splash_screen/splash_screen.dart';
 
 import 'common/service/network_helper/network_helper.dart';
 
@@ -34,6 +32,34 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   if (Platform.isIOS) {
     FirebaseNotificationManager.instance.showNotification(message);
+  }
+}
+
+void _registerAppDependencies() {
+  if (!Get.isRegistered<DynamicTranslations>()) {
+    final dynamicTranslations = DynamicTranslations();
+    dynamicTranslations.addTranslations(LocalFallbackTranslations.values);
+    dynamicTranslations.addTranslations({
+      'en': {
+        'Developed by': 'Developed by',
+        'No One Can live': 'No One Can live',
+        'No users in livestream': 'No users in livestream',
+        'To : ': 'To : ',
+        'None': 'None',
+      },
+      'ar': {
+        'Developed by': 'تم التطوير بواسطة',
+        'No One Can live': 'لا يوجد أحد في البث المباشر',
+        'No users in livestream': 'لا يوجد مستخدمون في البث المباشر',
+        'To : ': 'إلى : ',
+        'None': 'بدون',
+      },
+    });
+    Get.put(dynamicTranslations, permanent: true);
+  }
+
+  if (!Get.isRegistered<ThemeController>()) {
+    Get.put(ThemeController(), permanent: true);
   }
 }
 
@@ -50,6 +76,8 @@ Future<void> main() async {
   ));
 
   try {
+    _registerAppDependencies();
+
     await Firebase.initializeApp();
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
@@ -95,12 +123,12 @@ Future<void> main() async {
 
     NetworkHelper().initialize();
 
-    Get.put(DynamicTranslations());
-    Get.put(ThemeController(), permanent: true);
+    _registerAppDependencies();
 
     runApp(const RestartWidget(child: MyApp()));
   } catch (e, st) {
     Loggers.error('Fatal crash during app startup $st');
+    _registerAppDependencies();
     // Still try to run the app even if some init fails
     runApp(const RestartWidget(child: MyApp()));
   }
@@ -109,32 +137,21 @@ Future<void> main() async {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  Widget _getInitialRoute() {
-    final session = SessionManager.instance;
-    
-    if (session.isLogin()) {
-      return DashboardScreen(myUser: session.getUser());
-    } else {
-      bool isLanguageSelect = session.getBool(SessionKeys.isLanguageScreenSelect);
-      bool onBoardingShow = session.getBool(SessionKeys.isOnBoardingScreenSelect);
-      
-      if (!isLanguageSelect) {
-        return const SelectLanguageScreen(languageNavigationType: LanguageNavigationType.fromStart);
-      } else if (!onBoardingShow) {
-        return const OnBoardingScreen();
-      } else {
-        return const LoginScreen();
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     Get.find<ThemeController>();
 
     return GetMaterialApp(
-      builder: (context, child) =>
-          ScrollConfiguration(behavior: MyBehavior(), child: child!),
+      builder: (context, child) {
+        final languageCode = Get.locale?.languageCode ??
+            SessionManager.instance.getLang();
+        return Directionality(
+          textDirection: languageCode == 'ar'
+              ? TextDirection.rtl
+              : TextDirection.ltr,
+          child: ScrollConfiguration(behavior: MyBehavior(), child: child!),
+        );
+      },
       translations: Get.find<DynamicTranslations>(),
       locale: Locale(SessionManager.instance.getLang()),
       fallbackLocale: Locale(SessionManager.instance.getFallbackLang()),
@@ -151,7 +168,7 @@ class MyApp extends StatelessWidget {
       darkTheme: ThemeRes.darkTheme(context),
       theme: ThemeRes.darkTheme(context),
       debugShowCheckedModeBanner: false,
-      home: _getInitialRoute(),
+      home: const SplashScreen(),
     );
   }
 }

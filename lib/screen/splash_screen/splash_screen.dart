@@ -55,7 +55,7 @@ class SplashScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    'Developed by',
+                    'Developed by'.tr,
                     style: TextStyleCustom.outFitLight300(
                       color: Colors.white.withValues(alpha: 0.5),
                       fontSize: 12,

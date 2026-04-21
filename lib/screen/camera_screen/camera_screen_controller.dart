@@ -67,7 +67,7 @@ class CameraScreenController extends BaseController
     super.onInit();
     _initialize();
     selectedEffect =
-        Rx(DeepARFilters(id: -1, title: 'None', image: AssetRes.icNoFilter));
+        Rx(DeepARFilters(id: -1, title: 'None'.tr, image: AssetRes.icNoFilter));
   }
 
   @override

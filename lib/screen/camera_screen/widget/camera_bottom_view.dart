@@ -88,7 +88,7 @@ class _EffectList extends StatelessWidget {
     List<DeepARFilters> deepARFilters =
         controller.appSetting?.deepARFilters ?? [];
     deepARFilters.insert(
-        0, DeepARFilters(id: -1, title: 'None', image: AssetRes.icNoFilter));
+        0, DeepARFilters(id: -1, title: 'None'.tr, image: AssetRes.icNoFilter));
     return SizedBox(
       height: 89,
       child: ListView.builder(

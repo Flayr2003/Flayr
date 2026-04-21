@@ -68,7 +68,7 @@ class LivestreamView extends StatelessWidget {
   Widget _buildEmptyView() {
     return Center(
         child: Text(
-      'No users in livestream',
+      'No users in livestream'.tr,
       style: TextStyleCustom.unboundedMedium500(color: Colors.white),
     ));
   }
@@ -369,6 +369,6 @@ extension on Widget {
   }
 
   Widget _buildEmptyView() {
-    return const Center(child: Text('No users in livestream'));
+    return Center(child: Text('No users in livestream'.tr));
   }
 }

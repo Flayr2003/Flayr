@@ -191,7 +191,7 @@ class LiveStreamCommentView extends StatelessWidget {
                 ],
               ),
               if (!isBattleView)
-                Text('To : ${comment.receiverUser?.username ?? ''}',
+                Text('${'To : '.tr}${comment.receiverUser?.username ?? ''}',
                     style: TextStyleCustom.outFitLight300(color: Colors.white.withValues(alpha: .7), fontSize: 12))
             ],
           );

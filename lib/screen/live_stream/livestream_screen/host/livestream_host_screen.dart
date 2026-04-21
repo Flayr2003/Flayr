@@ -44,7 +44,7 @@ class LivestreamHostScreen extends StatelessWidget {
               () {
                 switch (controller.liveData.value.type) {
                   case null:
-                    return const Center(child: Text('No One Can live'));
+                    return Center(child: Text('No One Can live'.tr));
                   case LivestreamType.livestream:
                     return LivestreamView(
                         streamViews: controller.streamViews,
